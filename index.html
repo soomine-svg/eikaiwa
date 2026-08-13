@@ -427,6 +427,41 @@
     line-height: 1.6;
     display: none;
   }
+
+  /* ---------- あなうめクイズ ---------- */
+  .quiz-progress { display: flex; gap: 5px; justify-content: center; margin: 6px 0 14px; }
+  .quiz-progress span { width: 12px; height: 12px; border-radius: 999px; background: var(--line); }
+  .quiz-progress span.hit { background: var(--mint); }
+  .quiz-progress span.miss { background: var(--coral); }
+  .quiz-progress span.now { background: var(--sunny); }
+  .quiz-q-card {
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    padding: 22px 16px;
+    margin-top: 4px;
+  }
+  .clz-ja { font-size: 14px; color: var(--ink-soft); font-weight: 800; }
+  .clz-en { font-size: 21px; font-weight: 800; margin-top: 8px; line-height: 1.5; text-wrap: balance; }
+  .choices { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .choice-btn {
+    border: 3px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 17px;
+    font-weight: 800;
+    border-radius: 18px;
+    padding: 14px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .choice-btn.correct { background: #E2F8EE; border-color: var(--mint); color: #0E8A5F; }
+  .choice-btn.wrong { background: #FFECEF; border-color: var(--coral); color: #D63E56; }
+  .choice-btn:disabled { cursor: default; }
+  .quiz-feedback { min-height: 28px; text-align: center; font-size: 17px; font-weight: 800; margin-top: 12px; }
 </style>
 
 <div id="app">
@@ -531,6 +566,34 @@
       <div id="introResult"></div>
     </section>
 
+    <!-- あなうめクイズ -->
+    <section class="screen" id="screen-cloze">
+      <h2 class="title">あなうめクイズ 🧩</h2>
+      <p class="note">文の ＿＿＿ に入ることばをえらぼう！（全10問）<br>まちがえた文は「にがてれんしゅう」に入るよ</p>
+      <div id="clzStart" style="text-align:center;margin-top:14px">
+        <button class="btn-primary" id="clzGo">スタート！</button>
+      </div>
+      <div id="clzQuiz" style="display:none">
+        <div class="quiz-progress" id="clzProgress"></div>
+        <div class="quiz-q-card">
+          <div class="clz-ja" id="clzJa"></div>
+          <div class="clz-en" id="clzEn"></div>
+          <div style="margin-top:12px"><button class="round-btn btn-hear" id="clzHear" style="display:none" aria-label="文を聞く">🔊</button></div>
+        </div>
+        <div class="choices" id="clzChoices"></div>
+        <div class="quiz-feedback" id="clzFeedback"></div>
+        <div style="text-align:center;margin-top:10px"><button class="btn-primary" id="clzNext" style="display:none">次へ ▶</button></div>
+      </div>
+      <div class="finish-card" id="clzResult" style="display:none">
+        <div class="big" id="clzResEmoji">🎉</div>
+        <div class="score" id="clzResScore"></div>
+        <div class="msg" id="clzResMsg"></div>
+        <div class="finish-btns">
+          <button class="btn-primary" id="clzRetry">もう一度</button>
+        </div>
+      </div>
+    </section>
+
     <!-- きろく -->
     <section class="screen" id="screen-log">
       <h2 class="title">がんばりきろく 📈</h2>
@@ -541,6 +604,9 @@
           <div class="log-stat"><div class="num" id="statStars">0</div><div class="lbl">⭐スター</div></div>
         </div>
       </div>
+      <div class="dict-section-label">にがてれんしゅう 💪</div>
+      <p class="note">うまく言えなかった文・まちがえた文がここにたまるよ。<br>2回連続でクリアすると、リストから消える！</p>
+      <div id="weakArea"></div>
       <div class="dict-section-label">会話のクリア状況</div>
       <div id="sceneStarList"></div>
       <div class="dict-section-label">バックアップ・ひっこし 🎒</div>
@@ -558,6 +624,7 @@
   <nav>
     <button id="nav-scenes" class="active"><span class="nav-emoji">🗣️</span>かいわ</button>
     <button id="nav-phrases"><span class="nav-emoji">💬</span>フレーズ</button>
+    <button id="nav-cloze"><span class="nav-emoji">🧩</span>あなうめ</button>
     <button id="nav-intro"><span class="nav-emoji">🙋</span>じこしょうかい</button>
     <button id="nav-log"><span class="nav-emoji">📈</span>きろく</button>
   </nav>
@@ -976,19 +1043,41 @@ function updateStarCounter() {
   document.getElementById("starCounter").textContent = "⭐ " + totalStars();
 }
 
+/* ---- にがてな文（言えなかった・まちがえた文を覚えておく） ----
+   en → {kana, ja, w:失敗回数, c:連続成功数}。2回連続で成功したら卒業 */
+const KEY_WEAK = "eikaiwa_weak";
+let weakLines = lsGet(KEY_WEAK, {});
+function weakMark(en, kana, ja) {
+  const e = weakLines[en] || { kana: kana || "", ja: ja || "", w: 0, c: 0 };
+  e.w++; e.c = 0;
+  weakLines[en] = e;
+  lsSet(KEY_WEAK, weakLines);
+}
+/* 成功を1回きざむ。卒業したら true を返す */
+function weakClearStep(en) {
+  const e = weakLines[en];
+  if (!e) return false;
+  e.c++;
+  const out = e.c >= 2;
+  if (out) delete weakLines[en];
+  lsSet(KEY_WEAK, weakLines);
+  return out;
+}
+
 /* ================= 画面切りかえ ================= */
-const SCREENS = ["screen-scenes","screen-role","screen-play","screen-phrases","screen-intro","screen-log"];
+const SCREENS = ["screen-scenes","screen-role","screen-play","screen-phrases","screen-cloze","screen-intro","screen-log"];
 function show(id) {
   stopListening();
   if ("speechSynthesis" in window) speechSynthesis.cancel();
   SCREENS.forEach(s => document.getElementById(s).classList.toggle("show", s === id));
-  const navMap = { "screen-scenes":"nav-scenes","screen-role":"nav-scenes","screen-play":"nav-scenes","screen-phrases":"nav-phrases","screen-intro":"nav-intro","screen-log":"nav-log" };
-  ["nav-scenes","nav-phrases","nav-intro","nav-log"].forEach(n =>
+  const navMap = { "screen-scenes":"nav-scenes","screen-role":"nav-scenes","screen-play":"nav-scenes","screen-phrases":"nav-phrases","screen-cloze":"nav-cloze","screen-intro":"nav-intro","screen-log":"nav-log" };
+  ["nav-scenes","nav-phrases","nav-cloze","nav-intro","nav-log"].forEach(n =>
     document.getElementById(n).classList.toggle("active", n === navMap[id]));
   window.scrollTo(0, 0);
 }
 document.getElementById("nav-scenes").addEventListener("click", () => { renderSceneGrid(); show("screen-scenes"); });
 document.getElementById("nav-phrases").addEventListener("click", () => show("screen-phrases"));
+document.getElementById("nav-cloze").addEventListener("click", () => { resetCloze(); show("screen-cloze"); });
 document.getElementById("nav-intro").addEventListener("click", () => show("screen-intro"));
 document.getElementById("nav-log").addEventListener("click", () => { renderLog(); show("screen-log"); });
 document.getElementById("starCounter").addEventListener("click", () => { renderLog(); show("screen-log"); });
@@ -1136,6 +1225,7 @@ document.getElementById("turnHear").addEventListener("click", () => {
 });
 document.getElementById("turnSkip").addEventListener("click", () => {
   const line = curScene.lines[play.idx];
+  weakMark(line[1], line[2], line[3]);
   appendBubble(line, true, 0);
   play.earned.push(0);
   play.idx++;
@@ -1146,6 +1236,7 @@ document.getElementById("selfOk").addEventListener("click", () => {
   const line = curScene.lines[play.idx];
   playCorrect();
   bumpLog();
+  weakClearStep(line[1]);
   appendBubble(line, true, 3);
   play.earned.push(3);
   play.idx++;
@@ -1173,6 +1264,7 @@ micBtn.addEventListener("click", () => {
     if (stars >= 2) {
       playCorrect();
       bumpLog();
+      weakClearStep(line[1]);
       resultStars.textContent = "⭐".repeat(stars);
       resultMsg.textContent = pickMsg(stars === 3 ? PRAISE_3 : PRAISE_2);
       resultMsg.style.color = "#199A6C";
@@ -1186,6 +1278,7 @@ micBtn.addEventListener("click", () => {
       }, 1100);
     } else {
       playTryAgain();
+      weakMark(line[1], line[2], line[3]);
       resultStars.textContent = stars === 1 ? "⭐" : "";
       resultMsg.textContent = pickMsg(PRAISE_1);
       resultMsg.style.color = "#B07900";
@@ -1301,6 +1394,7 @@ function buildPhraseRow(p, headEl, cat) {
         const stars = scoreToStars(res.score);
         if (stars >= 2) {
           playCorrect();
+          weakClearStep(p[0]);
           if (!phrasesDone.has(p[0])) {
             phrasesDone.add(p[0]);
             lsSet(KEY_PHRASE, [...phrasesDone]);
@@ -1314,6 +1408,7 @@ function buildPhraseRow(p, headEl, cat) {
             '<br><span class="heard">きこえた英語: ' + res.heard + "</span>";
         } else {
           playTryAgain();
+          weakMark(p[0], p[1], p[2]);
           resBox.innerHTML = pickMsg(PRAISE_1) +
             '<br><span class="heard">きこえた英語: ' + res.heard + "</span>";
         }
@@ -1483,6 +1578,7 @@ function renderLog() {
   Object.values(dayLog).forEach(v => { total += v; });
   document.getElementById("statTotal").textContent = total;
   document.getElementById("statStars").textContent = totalStars();
+  renderWeakArea();
   const list = document.getElementById("sceneStarList");
   list.innerHTML = "";
   SCENES.forEach(sc => {
@@ -1494,12 +1590,246 @@ function renderLog() {
   });
 }
 
+/* ---------- にがてれんしゅう ---------- */
+function renderWeakArea() {
+  const area = document.getElementById("weakArea");
+  area.innerHTML = "";
+  const keys = Object.keys(weakLines).sort((a, b) => weakLines[b].w - weakLines[a].w);
+  if (!keys.length) {
+    area.innerHTML = '<p class="dict-msg">いまは にがてな文はないよ！すごい 🎉</p>';
+    return;
+  }
+  keys.slice(0, 15).forEach(en => area.appendChild(buildWeakRow(en, weakLines[en])));
+  if (keys.length > 15) {
+    const more = document.createElement("p");
+    more.className = "dict-msg";
+    more.textContent = "…ほか" + (keys.length - 15) + "文（クリアすると次が出てくるよ）";
+    area.appendChild(more);
+  }
+}
+function buildWeakRow(en, e) {
+  const row = document.createElement("div");
+  row.className = "ph-row";
+  row.style.background = "var(--card)";
+  const main = document.createElement("div");
+  main.className = "ph-main";
+  main.innerHTML =
+    '<span class="ph-emoji">💪</span>' +
+    '<span class="ph-texts"><span class="ph-en">' + en + '</span>' +
+    (e.kana ? '<br><span class="ph-kana">' + e.kana + '</span>' : "") +
+    (e.ja ? '<br><span class="ph-ja">' + e.ja + '</span>' : "") + '</span>';
+  const btns = document.createElement("div");
+  btns.className = "ph-btns";
+  const sp = document.createElement("button");
+  sp.className = "p-speak";
+  sp.textContent = "🔊";
+  sp.setAttribute("aria-label", "発音を聞く");
+  sp.addEventListener("click", () => speak(en));
+  btns.appendChild(sp);
+  const resBox = document.createElement("div");
+  resBox.className = "ph-result";
+  const onSuccess = (stars, heard) => {
+    playCorrect();
+    bumpLog();
+    const cleared = weakClearStep(en);
+    resBox.style.display = "block";
+    resBox.innerHTML = (stars ? "⭐".repeat(stars) + " " : "") +
+      (cleared ? "🎉 クリア！にがてリストから消えたよ" : "いいね！あと1回連続で成功したらクリア！") +
+      (heard ? '<br><span class="heard">きこえた英語: ' + heard + "</span>" : "");
+    if (cleared) setTimeout(() => { renderWeakArea(); }, 1600);
+  };
+  if (hasSR) {
+    const mic = document.createElement("button");
+    mic.className = "p-mic";
+    mic.textContent = "🎤";
+    mic.setAttribute("aria-label", "マイクで言ってみる");
+    mic.addEventListener("click", () => {
+      if (activeRec) { finishListening(); resBox.innerHTML = "はんてい中…"; return; }
+      document.querySelectorAll(".p-mic.listening").forEach(b => b.classList.remove("listening"));
+      resBox.style.display = "block";
+      resBox.innerHTML = "マイクじゅんびちゅう…";
+      listenFor(en, {
+        onStart: () => { mic.classList.add("listening"); resBox.innerHTML = "きいてるよ！はなしてね 👂"; },
+        onInterim: (t) => { resBox.innerHTML = '<span class="heard">きこえた: ' + t + "</span>"; }
+      }, (res, err) => {
+        mic.classList.remove("listening");
+        if (err) {
+          const tmp = document.createElement("div");
+          handleRecError(err, tmp);
+          resBox.innerHTML = tmp.textContent;
+          return;
+        }
+        const stars = scoreToStars(res.score);
+        if (stars >= 2) {
+          onSuccess(stars, res.heard);
+        } else {
+          playTryAgain();
+          weakMark(en, e.kana, e.ja);
+          resBox.innerHTML = pickMsg(PRAISE_1) +
+            '<br><span class="heard">きこえた英語: ' + res.heard + "</span>";
+        }
+      });
+    });
+    btns.appendChild(mic);
+  } else {
+    /* 音声認識が使えない端末: 聞いて言えたら自分で押す */
+    const ok = document.createElement("button");
+    ok.className = "p-mic";
+    ok.textContent = "👍";
+    ok.setAttribute("aria-label", "言えた！");
+    ok.addEventListener("click", () => onSuccess(3, ""));
+    btns.appendChild(ok);
+  }
+  main.appendChild(btns);
+  row.appendChild(main);
+  row.appendChild(resBox);
+  return row;
+}
+
+/* ================= あなうめクイズ ================= */
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function stripWord(w) { return w.replace(/[^A-Za-z']/g, ""); }
+/* フレーズ＋会話の全文からプールを作る（2語以上の文だけ） */
+function clozePool() {
+  const pool = [];
+  const seen = new Set();
+  const add = (en, kana, ja) => {
+    if (seen.has(en)) return;
+    seen.add(en);
+    if (en.split(" ").filter(w => stripWord(w)).length >= 2) pool.push({ en, kana, ja });
+  };
+  PHRASE_CATS.forEach(c => c.phrases.forEach(p => add(p[0], p[1], p[2])));
+  SCENES.forEach(sc => sc.lines.forEach(l => add(l[1], l[2], l[3])));
+  return pool;
+}
+let clozeAllWords = null;
+function getClozeWords() {
+  if (!clozeAllWords) {
+    const set = new Set();
+    clozePool().forEach(x => x.en.split(" ").forEach(w => {
+      const s = stripWord(w).toLowerCase();
+      if (s.length >= 2) set.add(s);
+    }));
+    clozeAllWords = [...set];
+  }
+  return clozeAllWords;
+}
+function makeClozeQ(item) {
+  const words = item.en.split(" ");
+  const cand = words.map((w, i) => [stripWord(w), i]).filter(x => x[0].length >= 3);
+  const cand2 = cand.length ? cand : words.map((w, i) => [stripWord(w), i]).filter(x => x[0].length >= 1);
+  const pick = cand2[Math.floor(Math.random() * cand2.length)];
+  const bi = pick[1];
+  const ans = pick[0].toLowerCase();
+  const disp = words.map((w, i) => i === bi ? w.replace(/[A-Za-z']+/, "＿＿＿") : w).join(" ");
+  /* まちがい選択肢: 長さが近い単語を優先して3つ */
+  const all = getClozeWords().filter(w => w !== ans);
+  const near = shuffle(all.filter(w => Math.abs(w.length - ans.length) <= 1));
+  const far = shuffle(all.filter(w => Math.abs(w.length - ans.length) > 1));
+  const wrongs = near.concat(far).slice(0, 3);
+  return { item, ans, disp, choices: shuffle([ans, ...wrongs]) };
+}
+let clz = null;
+function resetCloze() {
+  stopListening();
+  clz = null;
+  document.getElementById("clzStart").style.display = "block";
+  document.getElementById("clzQuiz").style.display = "none";
+  document.getElementById("clzResult").style.display = "none";
+}
+function startCloze() {
+  const qs = shuffle(clozePool()).slice(0, 10).map(makeClozeQ);
+  clz = { qs, i: 0, results: [] };
+  document.getElementById("clzStart").style.display = "none";
+  document.getElementById("clzResult").style.display = "none";
+  document.getElementById("clzQuiz").style.display = "block";
+  renderClozeQ();
+}
+function renderClozeQ() {
+  const q = clz.qs[clz.i];
+  const prog = document.getElementById("clzProgress");
+  prog.innerHTML = "";
+  clz.qs.forEach((_, i) => {
+    const dot = document.createElement("span");
+    if (i < clz.results.length) dot.className = clz.results[i] ? "hit" : "miss";
+    else if (i === clz.i) dot.className = "now";
+    prog.appendChild(dot);
+  });
+  document.getElementById("clzJa").textContent = q.item.ja;
+  document.getElementById("clzEn").textContent = q.disp;
+  document.getElementById("clzHear").style.display = "none"; /* 答え合わせまで🔊は出さない */
+  document.getElementById("clzFeedback").textContent = "";
+  document.getElementById("clzNext").style.display = "none";
+  const box = document.getElementById("clzChoices");
+  box.innerHTML = "";
+  q.choices.forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.textContent = c;
+    btn.addEventListener("click", () => answerCloze(btn, c, q));
+    box.appendChild(btn);
+  });
+}
+function answerCloze(btn, c, q) {
+  const buttons = document.querySelectorAll("#clzChoices .choice-btn");
+  buttons.forEach(b => (b.disabled = true));
+  const ok = c === q.ans;
+  clz.results.push(ok);
+  document.getElementById("clzEn").textContent = q.item.en;
+  const hear = document.getElementById("clzHear");
+  hear.style.display = "inline-block";
+  hear.onclick = () => speak(q.item.en);
+  const fb = document.getElementById("clzFeedback");
+  if (ok) {
+    btn.classList.add("correct");
+    fb.textContent = "正解！🎉";
+    fb.style.color = "var(--mint)";
+    playCorrect();
+  } else {
+    btn.classList.add("wrong");
+    buttons.forEach(b => { if (b.textContent === q.ans) b.classList.add("correct"); });
+    fb.textContent = "残念…正解は「" + q.ans + "」";
+    fb.style.color = "var(--coral)";
+    playTryAgain();
+    weakMark(q.item.en, q.item.kana, q.item.ja); /* まちがえた文は「にがてれんしゅう」へ */
+  }
+  speak(q.item.en);
+  document.getElementById("clzNext").style.display = "inline-block";
+}
+document.getElementById("clzGo").addEventListener("click", startCloze);
+document.getElementById("clzNext").addEventListener("click", () => {
+  clz.i++;
+  if (clz.i >= clz.qs.length) showClozeResult();
+  else renderClozeQ();
+});
+function showClozeResult() {
+  const score = clz.results.filter(Boolean).length;
+  const total = clz.qs.length;
+  document.getElementById("clzQuiz").style.display = "none";
+  const box = document.getElementById("clzResult");
+  document.getElementById("clzResEmoji").textContent = score === total ? "🏆" : score >= total * 0.7 ? "🎉" : "💪";
+  document.getElementById("clzResScore").textContent = score + " / " + total + " 問正解！";
+  document.getElementById("clzResMsg").textContent =
+    score === total ? "パーフェクト！すごい！！" :
+    score >= total * 0.7 ? "とってもいい調子！" :
+    "まちがえた文は「きろく」の にがてれんしゅう で練習できるよ！";
+  box.style.display = "block";
+}
+document.getElementById("clzRetry").addEventListener("click", startCloze);
+
 /* ---------- ひっこしコード ---------- */
 const portArea = document.getElementById("portArea");
 const portMsg = document.getElementById("portMsg");
 const importGo = document.getElementById("importGo");
 document.getElementById("exportBtn").addEventListener("click", () => {
-  const data = { v: 1, stars: sceneStars, phrases: [...phrasesDone], log: dayLog, profile: profile };
+  const data = { v: 1, stars: sceneStars, phrases: [...phrasesDone], log: dayLog, profile: profile, weak: weakLines };
   portArea.style.display = "block";
   importGo.style.display = "none";
   portArea.value = "EIKAIWA1." + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
@@ -1523,10 +1853,12 @@ importGo.addEventListener("click", () => {
     phrasesDone = new Set(data.phrases || []);
     dayLog = data.log || {};
     if (data.profile) profile = data.profile;
+    weakLines = data.weak || {};
     lsSet(KEY_STARS, sceneStars);
     lsSet(KEY_PHRASE, [...phrasesDone]);
     lsSet(KEY_LOG, dayLog);
     lsSet(KEY_PROFILE, profile);
+    lsSet(KEY_WEAK, weakLines);
     updateStarCounter();
     renderLog();
     renderPhrases();
