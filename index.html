@@ -335,6 +335,17 @@
   .ph-done { font-size: 14px; flex: none; min-width: 20px; text-align: center; }
   .ph-result { display: none; margin-top: 8px; font-size: 13px; font-weight: 800; }
   .ph-result .heard { color: #2C6FAB; font-weight: 700; font-size: 12px; }
+  .ph-native, .turn-native {
+    font-size: 12px;
+    font-weight: 800;
+    color: #2C6FAB;
+    background: #F4F9FF;
+    border: 2px solid #D8EBFF;
+    border-radius: 12px;
+    padding: 6px 10px;
+    margin-top: 8px;
+    cursor: pointer;
+  }
 
   /* ---------- intro builder ---------- */
   .form-card {
@@ -464,6 +475,7 @@
         <div class="turn-en" id="turnEn"></div>
         <div class="turn-kana" id="turnKana"></div>
         <div class="turn-ja" id="turnJa"></div>
+        <div class="turn-native" id="turnNative" style="display:none"></div>
         <div class="mic-row">
           <button class="round-btn btn-hear" id="turnHear" aria-label="お手本を聞く">🔊</button>
           <button class="round-btn btn-mic" id="turnMic" aria-label="マイクで話す">🎤</button>
@@ -573,7 +585,7 @@ const SCENES = [
     ["b","I'm eight years old.","アイム エイト イヤーズ オールド","8歳だよ。"]
   ]},
   { id: "goodbye", title: "バイバイのあいさつ", emoji: "👋", color: "var(--sky)", level: "やさしい", lines: [
-    ["a","I have to go now.","アイ ハブ トゥ ゴー ナウ","もう行かなきゃ。"],
+    ["a","I have to go now.","アイ ハブ トゥ ゴー ナウ","もう行かなきゃ。","I gotta go."],
     ["b","OK! See you tomorrow!","オーケー！スィー ユー トゥモロー","わかった！また明日ね！"],
     ["a","See you! Have a nice day!","スィー ユー！ハブ ア ナイス デイ","またね！良い一日を！"],
     ["b","You too! Bye!","ユー トゥー！バイ","そっちもね！バイバイ！"]
@@ -597,7 +609,7 @@ const SCENES = [
     ["b","Wow, it looks delicious!","ワオ、イット ルックス デリシャス","わあ、おいしそう！"]
   ]},
   { id: "play", title: "遊びにさそう", emoji: "🎈", color: "var(--sky)", level: "ふつう", lines: [
-    ["a","Do you want to play together?","ドゥ ユー ウォント トゥ プレイ トゥギャザー？","いっしょに遊ばない？"],
+    ["a","Do you want to play together?","ドゥ ユー ウォント トゥ プレイ トゥギャザー？","いっしょに遊ばない？","Wanna play?"],
     ["b","Yes! What do you want to do?","イエス！ワット ドゥ ユー ウォント トゥ ドゥ？","うん！何して遊ぶ？"],
     ["a","How about tag?","ハウ アバウト タッグ？","おにごっこはどう？"],
     ["b","Good idea! Let's go!","グッド アイディア！レッツ ゴー","いいね！行こう！"]
@@ -610,7 +622,7 @@ const SCENES = [
   ]},
   { id: "restaurant", title: "レストランで", emoji: "🍔", color: "var(--sunny)", level: "ふつう", lines: [
     ["a","What would you like?","ワット ウッド ユー ライク？","何になさいますか？"],
-    ["b","I'd like a hamburger, please.","アイド ライク ア ハンバーガー、プリーズ","ハンバーガーをください。"],
+    ["b","I'd like a hamburger, please.","アイド ライク ア ハンバーガー、プリーズ","ハンバーガーをください。","Can I get a hamburger?"],
     ["a","Sure. Anything to drink?","シュア。エニシング トゥ ドリンク？","かしこまりました。お飲みものは？"],
     ["b","Orange juice, please. Thank you!","オレンジ ジュース、プリーズ。サンキュー","オレンジジュースをください。ありがとう！"]
   ]},
@@ -665,32 +677,32 @@ const PHRASE_CATS = [
     ["Good afternoon!","グッド アフタヌーン","こんにちは！","🌤️"],
     ["Good evening!","グッド イブニング","こんばんは！","🌆"],
     ["Good night!","グッド ナイト","おやすみなさい！","🌙"],
-    ["Hello!","ハロー","こんにちは！","👋"],
-    ["How are you?","ハウ アー ユー？","元気？","🙂"],
-    ["I'm good, thank you!","アイム グッド、サンキュー","元気だよ、ありがとう！","😊"],
+    ["Hello!","ハロー","こんにちは！","👋","Hey!"],
+    ["How are you?","ハウ アー ユー？","元気？","🙂","How's it going?"],
+    ["I'm good, thank you!","アイム グッド、サンキュー","元気だよ、ありがとう！","😊","Good, thanks. You?"],
     ["See you later!","スィー ユー レイター","またあとでね！","🙌"],
     ["Have a nice day!","ハブ ア ナイス デイ","良い一日を！","🌈"],
     ["Welcome!","ウェルカム","ようこそ！","🎊"]
   ]},
   { name: "おれい・あやまる", emoji: "🙏", phrases: [
     ["Thank you so much!","サンキュー ソー マッチ","本当にありがとう！","💐"],
-    ["You're welcome.","ユア ウェルカム","どういたしまして。","😊"],
-    ["I'm sorry.","アイム ソーリー","ごめんなさい。","🙇"],
-    ["That's OK.","ザッツ オーケー","だいじょうぶだよ。","👌"],
+    ["You're welcome.","ユア ウェルカム","どういたしまして。","😊","No problem!"],
+    ["I'm sorry.","アイム ソーリー","ごめんなさい。","🙇","My bad!"],
+    ["That's OK.","ザッツ オーケー","だいじょうぶだよ。","👌","No worries!"],
     ["Excuse me.","イクスキューズ ミー","すみません。","🙋"],
-    ["Here you are.","ヒア ユー アー","はい、どうぞ。","🎁"],
+    ["Here you are.","ヒア ユー アー","はい、どうぞ。","🎁","Here you go."],
     ["After you.","アフター ユー","お先にどうぞ。","🚪"]
   ]},
   { name: "へんじ・あいづち", emoji: "💬", phrases: [
-    ["Yes!","イエス","うん！","⭕"],
+    ["Yes!","イエス","うん！","⭕","Yeah!"],
     ["No.","ノー","ううん。","❌"],
     ["OK!","オーケー","わかった！","👌"],
     ["Sure!","シュア","もちろん！","✨"],
     ["Of course!","オブ コース","もちろんだよ！","💯"],
     ["Me too!","ミー トゥー","私も！","🙋"],
-    ["Really?","リアリー？","ほんとに？","😲"],
-    ["That's great!","ザッツ グレイト","すごいね！","🎉"],
-    ["I see.","アイ スィー","なるほど。","💡"],
+    ["Really?","リアリー？","ほんとに？","😲","No way!"],
+    ["That's great!","ザッツ グレイト","すごいね！","🎉","Awesome!"],
+    ["I see.","アイ スィー","なるほど。","💡","Gotcha."],
     ["Sounds good!","サウンズ グッド","いいね！","👍"]
   ]},
   { name: "しつもんする", emoji: "❓", phrases: [
@@ -700,28 +712,28 @@ const PHRASE_CATS = [
     ["What time is it?","ワット タイム イズ イット？","今何時？","🕒"],
     ["How much is it?","ハウ マッチ イズ イット？","いくらですか？","💰"],
     ["Can you help me?","キャン ユー ヘルプ ミー？","手伝ってくれる？","🆘"],
-    ["May I come in?","メイ アイ カム イン？","入ってもいいですか？","🚪"],
+    ["May I come in?","メイ アイ カム イン？","入ってもいいですか？","🚪","Can I come in?"],
     ["Can I try?","キャン アイ トライ？","やってみてもいい？","🙋"]
   ]},
   { name: "こまったとき", emoji: "🆘", phrases: [
     ["I don't understand.","アイ ドント アンダースタンド","わかりません。","😵"],
-    ["Please say that again.","プリーズ セイ ザット アゲイン","もう一度言ってください。","🔁"],
+    ["Please say that again.","プリーズ セイ ザット アゲイン","もう一度言ってください。","🔁","Sorry, what was that?"],
     ["Please speak slowly.","プリーズ スピーク スローリー","ゆっくり話してください。","🐢"],
     ["How do you say this in English?","ハウ ドゥ ユー セイ ディス イン イングリッシュ？","これは英語で何て言うの？","🗨️"],
     ["What does it mean?","ワット ダズ イット ミーン？","どういう意味？","❓"],
-    ["I don't know.","アイ ドント ノウ","知らないなあ。","🤷"],
-    ["Just a minute.","ジャスト ア ミニット","ちょっと待ってね。","⏳"],
+    ["I don't know.","アイ ドント ノウ","知らないなあ。","🤷","No idea."],
+    ["Just a minute.","ジャスト ア ミニット","ちょっと待ってね。","⏳","Hang on!"],
     ["Help me, please!","ヘルプ ミー、プリーズ","助けてください！","🚨"]
   ]},
   { name: "きもちを言う", emoji: "💗", phrases: [
     ["I'm happy!","アイム ハッピー","うれしい！","😄"],
     ["I'm sleepy.","アイム スリーピー","ねむい。","😪"],
-    ["I'm hungry.","アイム ハングリー","おなかすいた。","🍙"],
+    ["I'm hungry.","アイム ハングリー","おなかすいた。","🍙","I'm starving!"],
     ["I'm full.","アイム フル","おなかいっぱい。","😋"],
     ["I'm so excited!","アイム ソー イクサイティッド","すっごくわくわくする！","🤩"],
     ["I like it!","アイ ライク イット","気に入った！","💕"],
-    ["I did it!","アイ ディド イット","できたよ！","🏆"],
-    ["You can do it!","ユー キャン ドゥ イット","きみならできる！","💪"]
+    ["I did it!","アイ ディド イット","できたよ！","🏆","Nailed it!"],
+    ["You can do it!","ユー キャン ドゥ イット","きみならできる！","💪","You got this!"]
   ]}
 ];
 
@@ -1100,6 +1112,15 @@ function showYourTurn(line) {
   document.getElementById("turnKana").textContent = line[2];
   document.getElementById("turnKana").style.visibility = play.hardMode ? "hidden" : "visible";
   document.getElementById("turnJa").textContent = line[3];
+  const tn = document.getElementById("turnNative");
+  if (line[4]) {
+    tn.style.display = "block";
+    tn.textContent = "🇺🇸 現地ではこう言うよ: " + line[4] + " 🔊";
+    tn.onclick = () => speak(line[4]);
+  } else {
+    tn.style.display = "none";
+    tn.onclick = null;
+  }
   micStatus.textContent = hasSR ? "🎤を押して、英語で言ってみよう" : "🔊で聞いて、声に出して言ってみよう";
   heardBox.style.display = "none";
   resultStars.textContent = "";
@@ -1303,6 +1324,13 @@ function buildPhraseRow(p, headEl, cat) {
   btns.appendChild(done);
   main.appendChild(btns);
   row.appendChild(main);
+  if (p[4]) {
+    const nat = document.createElement("div");
+    nat.className = "ph-native";
+    nat.textContent = "🇺🇸 現地ではこう言うよ: " + p[4] + " 🔊";
+    nat.addEventListener("click", () => speak(p[4]));
+    row.appendChild(nat);
+  }
   row.appendChild(resBox);
   return row;
 }
