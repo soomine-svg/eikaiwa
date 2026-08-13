@@ -1,0 +1,1498 @@
+<meta charset="utf-8">
+<title>えいかいわのもり 🦜</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<meta name="theme-color" content="#2EC48D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="えいかいわのもり">
+<style>
+  :root {
+    --bg: #F7FDF9;
+    --card: #FFFFFF;
+    --ink: #3D3A50;
+    --ink-soft: #8B87A0;
+    --coral: #FF6B81;
+    --sunny: #FFB830;
+    --mint: #2EC48D;
+    --sky: #3FA9F5;
+    --lavender: #9B7DE4;
+    --peach: #FF9770;
+    --line: #E4F2E9;
+    --shadow: 0 4px 14px rgba(70, 110, 90, 0.10);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-rounded, "Hiragino Maru Gothic ProN", "Zen Maru Gothic", "BIZ UDPGothic", "Hiragino Sans", sans-serif;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  #app {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  /* ---------- header ---------- */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px 10px;
+  }
+  header .logo { font-size: 20px; font-weight: 800; letter-spacing: 0.02em; }
+  header .stars {
+    background: #FFF3D6;
+    color: #B07900;
+    border: 2px solid #FFE1A0;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 14px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  main { flex: 1; padding: 4px 16px 96px; }
+
+  /* ---------- bottom nav ---------- */
+  nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    background: var(--card);
+    border-top: 2px solid var(--line);
+    padding: 6px 6px calc(8px + env(safe-area-inset-bottom));
+    gap: 4px;
+    z-index: 20;
+  }
+  nav button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    border-radius: 16px;
+    padding: 8px 2px 6px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  nav button .nav-emoji { display: block; font-size: 21px; margin-bottom: 2px; }
+  nav button.active { background: #E7F8F0; color: #199A6C; }
+
+  /* ---------- shared ---------- */
+  .screen { display: none; }
+  .screen.show { display: block; }
+  h2.title { font-size: 17px; margin: 10px 2px 12px; text-wrap: balance; }
+  .note { color: var(--ink-soft); font-size: 13px; font-weight: 700; margin: 0 2px 12px; line-height: 1.6; }
+  .back-btn {
+    border: 2px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 8px 16px;
+    margin: 8px 0 4px;
+    cursor: pointer;
+  }
+  .btn-primary {
+    border: none;
+    background: var(--mint);
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 12px 26px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .btn-primary:disabled { opacity: 0.55; cursor: default; }
+  button:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
+
+  /* ---------- scene grid ---------- */
+  .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cat-card {
+    border: none;
+    border-radius: 22px;
+    padding: 16px 12px 14px;
+    text-align: center;
+    color: #fff;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .cat-card .cat-emoji { font-size: 34px; display: block; }
+  .cat-card .cat-name { font-size: 14px; font-weight: 800; display: block; margin-top: 6px; }
+  .cat-card .cat-progress {
+    display: inline-block;
+    margin-top: 8px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  /* ---------- chat ---------- */
+  .chat-area { padding: 4px 0 10px; }
+  .bubble-row { display: flex; margin: 8px 0; }
+  .bubble-row.me { justify-content: flex-end; }
+  .bubble {
+    max-width: 82%;
+    border-radius: 18px;
+    padding: 10px 14px;
+    box-shadow: var(--shadow);
+    font-weight: 700;
+  }
+  .bubble-row.them .bubble { background: var(--card); border: 2px solid var(--line); border-bottom-left-radius: 6px; }
+  .bubble-row.me .bubble { background: #E7F8F0; border: 2px solid #C9EEDD; border-bottom-right-radius: 6px; }
+  .bubble .b-en { font-size: 15px; }
+  .bubble .b-kana { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
+  .bubble .b-ja { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .bubble .b-stars { font-size: 13px; margin-top: 3px; }
+  .bubble-face { font-size: 24px; margin: 0 6px; align-self: flex-end; }
+
+  /* ---------- your turn panel ---------- */
+  .turn-panel {
+    background: var(--card);
+    border: 3px solid #C9EEDD;
+    border-radius: 22px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    margin-top: 10px;
+    text-align: center;
+  }
+  .turn-label { font-size: 13px; font-weight: 800; color: #199A6C; margin-bottom: 8px; }
+  .turn-en { font-size: 20px; font-weight: 800; line-height: 1.4; }
+  .turn-kana { font-size: 13px; color: var(--ink-soft); font-weight: 700; margin-top: 4px; }
+  .turn-ja { font-size: 13px; color: var(--ink-soft); font-weight: 700; margin-top: 2px; }
+  .turn-en.hidden-en { filter: blur(6px); }
+  .mic-row { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 14px; }
+  .round-btn {
+    border: none;
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    font-family: inherit;
+  }
+  .btn-hear { width: 54px; height: 54px; background: var(--sky); color: #fff; }
+  .btn-mic { width: 74px; height: 74px; background: var(--coral); color: #fff; font-size: 32px; transition: transform 0.15s; }
+  .btn-mic:active { transform: scale(0.94); }
+  .btn-mic.listening {
+    animation: pulse 1s infinite;
+    background: #E03B55;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 107, 129, 0.55); }
+    70% { box-shadow: 0 0 0 18px rgba(255, 107, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 107, 129, 0); }
+  }
+  .btn-skip { width: 54px; height: 54px; background: var(--card); border: 2px solid var(--line); color: var(--ink-soft); font-size: 18px; }
+  .mic-status { min-height: 22px; margin-top: 10px; font-size: 13px; font-weight: 800; color: var(--ink-soft); }
+  .heard-box {
+    margin-top: 8px;
+    background: #F4F9FF;
+    border: 2px solid #D8EBFF;
+    border-radius: 14px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #2C6FAB;
+    display: none;
+  }
+  .result-stars { font-size: 26px; margin-top: 8px; min-height: 32px; }
+  .result-msg { font-size: 14px; font-weight: 800; min-height: 20px; }
+  .self-check-row { display: none; margin-top: 10px; gap: 10px; justify-content: center; }
+
+  .hint-toggle-row { text-align: right; margin: 6px 2px; }
+  .hint-toggle {
+    border: 2px solid var(--line);
+    background: var(--card);
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .hint-toggle.on { background: #FFF3D6; color: #B07900; border-color: #FFE1A0; }
+
+  /* ---------- scene finish ---------- */
+  .finish-card {
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 22px;
+    padding: 24px 16px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    margin-top: 14px;
+  }
+  .finish-card .big { font-size: 52px; }
+  .finish-card .score { font-size: 26px; font-weight: 800; margin: 6px 0; }
+  .finish-card .msg { font-size: 14px; font-weight: 800; color: var(--ink-soft); margin-bottom: 14px; }
+  .finish-btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
+  /* ---------- role pick ---------- */
+  .role-card {
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 22px;
+    padding: 18px 16px;
+    box-shadow: var(--shadow);
+    margin-top: 10px;
+    text-align: center;
+  }
+  .role-btns { display: flex; gap: 10px; margin-top: 12px; }
+  .role-btn {
+    flex: 1;
+    border: 3px solid var(--line);
+    background: var(--card);
+    border-radius: 18px;
+    padding: 14px 8px;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .role-btn .r-emoji { display: block; font-size: 30px; margin-bottom: 4px; }
+  .role-btn .r-sub { display: block; font-size: 11px; color: var(--ink-soft); margin-top: 4px; font-weight: 700; }
+  .preview-line { text-align: left; font-size: 13px; font-weight: 700; margin: 4px 0; color: var(--ink-soft); }
+  .preview-line b { color: var(--ink); }
+
+  /* ---------- phrases ---------- */
+  .ph-cat {
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 22px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .ph-cat-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: none;
+    background: transparent;
+    padding: 14px 16px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+  }
+  .ph-cat-head .pc-emoji { font-size: 24px; }
+  .ph-cat-head .pc-count { margin-left: auto; font-size: 12px; color: var(--ink-soft); }
+  .ph-list { display: none; padding: 0 12px 12px; }
+  .ph-cat.open .ph-list { display: block; }
+  .ph-row {
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .ph-main { display: flex; align-items: center; gap: 8px; }
+  .ph-emoji { font-size: 22px; }
+  .ph-texts { flex: 1; min-width: 0; }
+  .ph-en { font-size: 15px; font-weight: 800; }
+  .ph-kana { font-size: 11px; color: var(--ink-soft); font-weight: 700; }
+  .ph-ja { font-size: 12px; color: var(--ink-soft); font-weight: 700; }
+  .ph-btns { display: flex; gap: 6px; }
+  .p-speak, .p-mic {
+    border: none;
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    font-size: 17px;
+    cursor: pointer;
+    flex: none;
+  }
+  .p-speak { background: #E8F4FF; }
+  .p-mic { background: #FFE9ED; }
+  .p-mic.listening { animation: pulse 1s infinite; background: var(--coral); }
+  .ph-done { font-size: 14px; flex: none; min-width: 20px; text-align: center; }
+  .ph-result { display: none; margin-top: 8px; font-size: 13px; font-weight: 800; }
+  .ph-result .heard { color: #2C6FAB; font-weight: 700; font-size: 12px; }
+
+  /* ---------- intro builder ---------- */
+  .form-card {
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 22px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+  .f-label { font-size: 13px; font-weight: 800; margin: 12px 0 6px; }
+  .f-label:first-child { margin-top: 0; }
+  .f-input {
+    width: 100%;
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    border: 2px solid var(--line);
+    background: var(--card);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .chip.sel { background: #E7F8F0; border-color: var(--mint); color: #199A6C; }
+  .intro-line {
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+
+  /* ---------- log ---------- */
+  .log-card {
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 22px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+  .log-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
+  .log-stat .num { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .log-stat .lbl { font-size: 11px; color: var(--ink-soft); font-weight: 800; margin-top: 2px; }
+  .scene-star-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    padding: 9px 14px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .dict-section-label { font-size: 13px; font-weight: 800; color: var(--ink-soft); margin: 18px 2px 8px; }
+  .dict-msg { color: var(--ink-soft); font-size: 13px; font-weight: 700; text-align: center; line-height: 1.7; }
+
+  .sr-warn {
+    background: #FFF7E8;
+    border: 2px solid #FFE1A0;
+    border-radius: 16px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #8A6100;
+    margin-bottom: 12px;
+    line-height: 1.6;
+    display: none;
+  }
+</style>
+
+<div id="app">
+  <header>
+    <div class="logo">えいかいわのもり 🦜</div>
+    <button class="stars" id="starCounter" aria-label="学習記録を見る">⭐ 0</button>
+  </header>
+
+  <main>
+    <div class="sr-warn" id="srWarn">この端末では音声認識が使えないみたい。🔊で聞いて声に出したら、自分で「👍言えた！」を押して進んでね。</div>
+
+    <!-- かいわ: シーン一覧 -->
+    <section class="screen show" id="screen-scenes">
+      <h2 class="title">どの場面で話す？🎬</h2>
+      <p class="note">アプリが相手役になって英語で話しかけるよ。<br>🎤で答えて、会話を最後まで続けよう！</p>
+      <div class="cat-grid" id="sceneGrid"></div>
+    </section>
+
+    <!-- かいわ: 役えらび -->
+    <section class="screen" id="screen-role">
+      <button class="back-btn" id="roleBack">← もどる</button>
+      <h2 class="title" id="roleTitle"></h2>
+      <div class="role-card">
+        <div style="font-weight:800;font-size:14px">どっちの役をやる？🎭</div>
+        <div class="role-btns">
+          <button class="role-btn" id="roleA"><span class="r-emoji">🐰</span>Aやく<span class="r-sub">先に話しかける役</span></button>
+          <button class="role-btn" id="roleB"><span class="r-emoji">🐻</span>Bやく<span class="r-sub">返事をする役</span></button>
+        </div>
+        <div style="margin-top:14px">
+          <button class="back-btn" id="listenAll" style="margin:0">▶ まず通して聞いてみる</button>
+        </div>
+      </div>
+      <div class="dict-section-label">この会話の中身</div>
+      <div id="rolePreview"></div>
+    </section>
+
+    <!-- かいわ: ロールプレイ本番 -->
+    <section class="screen" id="screen-play">
+      <button class="back-btn" id="playBack">← やめる</button>
+      <div class="hint-toggle-row">
+        <button class="hint-toggle" id="hintToggle">💪 むずかしモード（英語をかくす）</button>
+      </div>
+      <div class="chat-area" id="chatArea"></div>
+      <div class="turn-panel" id="turnPanel" style="display:none">
+        <div class="turn-label" id="turnLabel">🎤 あなたの番！これを英語で言ってみよう</div>
+        <div class="turn-en" id="turnEn"></div>
+        <div class="turn-kana" id="turnKana"></div>
+        <div class="turn-ja" id="turnJa"></div>
+        <div class="mic-row">
+          <button class="round-btn btn-hear" id="turnHear" aria-label="お手本を聞く">🔊</button>
+          <button class="round-btn btn-mic" id="turnMic" aria-label="マイクで話す">🎤</button>
+          <button class="round-btn btn-skip" id="turnSkip" aria-label="スキップ">⏭️</button>
+        </div>
+        <div class="mic-status" id="micStatus"></div>
+        <div class="heard-box" id="heardBox"></div>
+        <div class="result-stars" id="resultStars"></div>
+        <div class="result-msg" id="resultMsg"></div>
+        <div class="self-check-row" id="selfCheckRow">
+          <button class="btn-primary" id="selfOk">👍 言えた！</button>
+        </div>
+      </div>
+      <div class="finish-card" id="finishCard" style="display:none">
+        <div class="big" id="finEmoji">🎉</div>
+        <div class="score" id="finScore"></div>
+        <div class="msg" id="finMsg"></div>
+        <div class="finish-btns">
+          <button class="btn-primary" id="finRetry">もう一度</button>
+          <button class="back-btn" id="finSwitch" style="margin:0">役を交代する</button>
+          <button class="back-btn" id="finHome" style="margin:0">場面えらびへ</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- フレーズ -->
+    <section class="screen" id="screen-phrases">
+      <h2 class="title">毎日つかうフレーズ 💬</h2>
+      <p class="note">🔊で聞いて、🎤で言ってみよう。<br>うまく言えたら ✅ がつくよ！</p>
+      <div id="phraseArea"></div>
+    </section>
+
+    <!-- じこしょうかい -->
+    <section class="screen" id="screen-intro">
+      <h2 class="title">じこしょうかいを作ろう 🙋</h2>
+      <p class="note">えらんだり書いたりすると、あなただけの<br>自己紹介が英語でできあがるよ！</p>
+      <div class="form-card">
+        <div class="f-label">なまえ（ローマ字で）</div>
+        <input class="f-input" id="inName" placeholder="れい: Haruto" autocomplete="off" autocapitalize="words">
+        <div class="f-label">なんさい？</div>
+        <div class="chip-row" id="ageChips"></div>
+        <div class="f-label">どこに住んでる？（ローマ字で・とばしてもOK）</div>
+        <input class="f-input" id="inFrom" placeholder="れい: Miyazaki" autocomplete="off" autocapitalize="words">
+        <div class="f-label">好きなこと（1つえらぶ or 書く）</div>
+        <div class="chip-row" id="likeChips"></div>
+        <input class="f-input" id="inLikeFree" placeholder="ほかの好きなこと（英語で）" autocomplete="off" style="margin-top:6px">
+        <div class="f-label">好きな食べもの</div>
+        <div class="chip-row" id="foodChips"></div>
+        <div style="text-align:center;margin-top:16px">
+          <button class="btn-primary" id="buildIntro">✨ 自己紹介を作る</button>
+        </div>
+      </div>
+      <div id="introResult"></div>
+    </section>
+
+    <!-- きろく -->
+    <section class="screen" id="screen-log">
+      <h2 class="title">がんばりきろく 📈</h2>
+      <div class="log-card">
+        <div class="log-stats">
+          <div class="log-stat"><div class="num" id="statToday">0</div><div class="lbl">今日言えた文</div></div>
+          <div class="log-stat"><div class="num" id="statTotal">0</div><div class="lbl">ぜんぶで</div></div>
+          <div class="log-stat"><div class="num" id="statStars">0</div><div class="lbl">⭐スター</div></div>
+        </div>
+      </div>
+      <div class="dict-section-label">会話のクリア状況</div>
+      <div id="sceneStarList"></div>
+      <div class="dict-section-label">バックアップ・ひっこし 🎒</div>
+      <p class="note">スマホを買いかえる前に「コードを出す」→LINEのキープなどに貼っておこう。新しいスマホで「コードを入れる」と記録がもどるよ</p>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="back-btn" id="exportBtn">📤 コードを出す</button>
+        <button class="back-btn" id="importBtn">📥 コードを入れる</button>
+      </div>
+      <textarea id="portArea" style="display:none;width:100%;height:110px;margin-top:10px;border:3px solid var(--line);border-radius:14px;padding:10px;font-family:inherit;font-size:12px;color:var(--ink);background:var(--card)"></textarea>
+      <div style="text-align:center;margin-top:8px"><button class="btn-primary" id="importGo" style="display:none">この記録を読み込む</button></div>
+      <p class="dict-msg" id="portMsg" style="margin-top:8px"></p>
+    </section>
+  </main>
+
+  <nav>
+    <button id="nav-scenes" class="active"><span class="nav-emoji">🗣️</span>かいわ</button>
+    <button id="nav-phrases"><span class="nav-emoji">💬</span>フレーズ</button>
+    <button id="nav-intro"><span class="nav-emoji">🙋</span>じこしょうかい</button>
+    <button id="nav-log"><span class="nav-emoji">📈</span>きろく</button>
+  </nav>
+</div>
+
+<script>
+/* =====================================================
+   えいかいわのもり — 話せる英会話れんしゅうアプリ
+   TTS: speechSynthesis / 聞き取り: SpeechRecognition
+   ===================================================== */
+
+/* ================= 会話シーン ================= */
+/* lines: [話す人(a/b), 英語, カタカナ, 日本語] */
+const SCENES = [
+  { id: "morning", title: "あさのあいさつ", emoji: "🌅", color: "var(--sunny)", level: "やさしい", lines: [
+    ["a","Good morning!","グッド モーニング","おはよう！"],
+    ["b","Good morning! How are you?","グッド モーニング！ハウ アー ユー？","おはよう！元気？"],
+    ["a","I'm good, thank you. And you?","アイム グッド、サンキュー。アンド ユー？","元気だよ、ありがとう。そっちは？"],
+    ["b","I'm great!","アイム グレイト","絶好調だよ！"]
+  ]},
+  { id: "firstmeet", title: "はじめまして", emoji: "🤝", color: "var(--coral)", level: "やさしい", lines: [
+    ["a","Hello! I'm Emma. What's your name?","ハロー！アイム エマ。ワッツ ユア ネーム？","こんにちは！エマだよ。名前は？"],
+    ["b","Hi! My name is Ken. Nice to meet you.","ハイ！マイ ネーム イズ ケン。ナイス トゥ ミート ユー","やあ！ケンだよ。よろしくね。"],
+    ["a","Nice to meet you too! How old are you?","ナイス トゥ ミート ユー トゥー！ハウ オールド アー ユー？","こちらこそよろしく！何歳？"],
+    ["b","I'm eight years old.","アイム エイト イヤーズ オールド","8歳だよ。"]
+  ]},
+  { id: "goodbye", title: "バイバイのあいさつ", emoji: "👋", color: "var(--sky)", level: "やさしい", lines: [
+    ["a","I have to go now.","アイ ハブ トゥ ゴー ナウ","もう行かなきゃ。"],
+    ["b","OK! See you tomorrow!","オーケー！スィー ユー トゥモロー","わかった！また明日ね！"],
+    ["a","See you! Have a nice day!","スィー ユー！ハブ ア ナイス デイ","またね！良い一日を！"],
+    ["b","You too! Bye!","ユー トゥー！バイ","そっちもね！バイバイ！"]
+  ]},
+  { id: "goodnight", title: "おやすみなさい", emoji: "🌙", color: "var(--lavender)", level: "やさしい", lines: [
+    ["a","I'm sleepy.","アイム スリーピー","ねむいなあ。"],
+    ["b","Me too. Let's go to bed.","ミー トゥー。レッツ ゴー トゥ ベッド","私も。もう寝ようよ。"],
+    ["a","Good night!","グッド ナイト","おやすみ！"],
+    ["b","Good night. Sweet dreams!","グッド ナイト。スウィート ドリームズ","おやすみ。いい夢見てね！"]
+  ]},
+  { id: "school", title: "学校で", emoji: "🏫", color: "var(--mint)", level: "やさしい", lines: [
+    ["a","What's your favorite subject?","ワッツ ユア フェイバリット サブジェクト？","好きな教科は何？"],
+    ["b","I like music! How about you?","アイ ライク ミュージック！ハウ アバウト ユー？","音楽が好き！あなたは？"],
+    ["a","I like P.E.!","アイ ライク ピーイー","体育が好き！"],
+    ["b","Sounds fun!","サウンズ ファン","楽しそう！"]
+  ]},
+  { id: "lunch", title: "きゅうしょくの時間", emoji: "🍱", color: "var(--peach)", level: "やさしい", lines: [
+    ["a","I'm hungry!","アイム ハングリー","おなかすいた！"],
+    ["b","Me too! It's lunch time.","ミー トゥー！イッツ ランチ タイム","ぼくも！給食の時間だよ。"],
+    ["a","Yay! Let's eat!","イェイ！レッツ イート","やった！食べよう！"],
+    ["b","Wow, it looks delicious!","ワオ、イット ルックス デリシャス","わあ、おいしそう！"]
+  ]},
+  { id: "play", title: "遊びにさそう", emoji: "🎈", color: "var(--sky)", level: "ふつう", lines: [
+    ["a","Do you want to play together?","ドゥ ユー ウォント トゥ プレイ トゥギャザー？","いっしょに遊ばない？"],
+    ["b","Yes! What do you want to do?","イエス！ワット ドゥ ユー ウォント トゥ ドゥ？","うん！何して遊ぶ？"],
+    ["a","How about tag?","ハウ アバウト タッグ？","おにごっこはどう？"],
+    ["b","Good idea! Let's go!","グッド アイディア！レッツ ゴー","いいね！行こう！"]
+  ]},
+  { id: "shopping", title: "お買いもの", emoji: "🛍️", color: "var(--coral)", level: "ふつう", lines: [
+    ["a","Can I help you?","キャン アイ ヘルプ ユー？","いらっしゃいませ、何かお探しですか？"],
+    ["b","Yes, I'm looking for a cap.","イエス、アイム ルッキング フォー ア キャップ","はい、ぼうしを探しています。"],
+    ["a","How about this blue one?","ハウ アバウト ディス ブルー ワン？","この青いのはいかがですか？"],
+    ["b","I like it! I'll take it.","アイ ライク イット！アイル テイク イット","いいですね！それにします。"]
+  ]},
+  { id: "restaurant", title: "レストランで", emoji: "🍔", color: "var(--sunny)", level: "ふつう", lines: [
+    ["a","What would you like?","ワット ウッド ユー ライク？","何になさいますか？"],
+    ["b","I'd like a hamburger, please.","アイド ライク ア ハンバーガー、プリーズ","ハンバーガーをください。"],
+    ["a","Sure. Anything to drink?","シュア。エニシング トゥ ドリンク？","かしこまりました。お飲みものは？"],
+    ["b","Orange juice, please. Thank you!","オレンジ ジュース、プリーズ。サンキュー","オレンジジュースをください。ありがとう！"]
+  ]},
+  { id: "weather", title: "お天気の話", emoji: "☀️", color: "var(--sky)", level: "ふつう", lines: [
+    ["a","It's sunny today!","イッツ サニー トゥデイ","今日は晴れだね！"],
+    ["b","Yes! Let's play outside.","イエス！レッツ プレイ アウトサイド","うん！外で遊ぼうよ。"],
+    ["a","Great! I love sunny days.","グレイト！アイ ラブ サニー デイズ","いいね！晴れの日って大好き。"],
+    ["b","Me too!","ミー トゥー","ぼくも！"]
+  ]},
+  { id: "howfeel", title: "どうしたの？", emoji: "🥺", color: "var(--lavender)", level: "ふつう", lines: [
+    ["a","What's wrong?","ワッツ ロング？","どうしたの？"],
+    ["b","I lost my pencil.","アイ ロスト マイ ペンシル","えんぴつをなくしちゃった。"],
+    ["a","Don't worry. Let's look for it together.","ドント ウォーリー。レッツ ルック フォー イット トゥギャザー","心配しないで。いっしょに探そう。"],
+    ["b","Thank you! You're so kind.","サンキュー！ユア ソー カインド","ありがとう！やさしいね。"]
+  ]},
+  { id: "phone", title: "電話で", emoji: "📱", color: "var(--mint)", level: "ふつう", lines: [
+    ["a","Hello? What are you doing?","ハロー？ワット アー ユー ドゥーイング？","もしもし、今何してる？"],
+    ["b","I'm doing my homework.","アイム ドゥーイング マイ ホームワーク","宿題やってるよ。"],
+    ["a","Let's play after that!","レッツ プレイ アフター ザット","終わったら遊ぼうよ！"],
+    ["b","OK! See you later!","オーケー！スィー ユー レイター","いいよ！あとでね！"]
+  ]},
+  { id: "direction", title: "道をたずねる", emoji: "🗺️", color: "var(--peach)", level: "ちょいむず", lines: [
+    ["a","Excuse me. Where is the library?","イクスキューズ ミー。ウェア イズ ザ ライブラリー？","すみません。図書館はどこですか？"],
+    ["b","Go straight and turn right.","ゴー ストレイト アンド ターン ライト","まっすぐ行って、右に曲がってください。"],
+    ["a","Thank you so much!","サンキュー ソー マッチ","ありがとうございます！"],
+    ["b","You're welcome!","ユア ウェルカム","どういたしまして！"]
+  ]},
+  { id: "sick", title: "体調を気づかう", emoji: "🤒", color: "var(--coral)", level: "ちょいむず", lines: [
+    ["a","Are you OK?","アー ユー オーケー？","だいじょうぶ？"],
+    ["b","I have a cold.","アイ ハブ ア コールド","かぜをひいたんだ。"],
+    ["a","That's too bad. Take care!","ザッツ トゥー バッド。テイク ケア","それは大変だね。お大事に！"],
+    ["b","Thank you. I'll go home early.","サンキュー。アイル ゴー ホーム アーリー","ありがとう。早めに帰るよ。"]
+  ]},
+  { id: "dream", title: "しょうらいの夢", emoji: "🔮", color: "var(--lavender)", level: "ちょいむず", lines: [
+    ["a","What do you want to be?","ワット ドゥ ユー ウォント トゥ ビー？","将来何になりたい？"],
+    ["b","I want to be a soccer player!","アイ ウォント トゥ ビー ア サッカー プレイヤー","サッカー選手になりたい！"],
+    ["a","Cool! You can do it!","クール！ユー キャン ドゥ イット","いいね！きっとなれるよ！"],
+    ["b","Thanks! I'll do my best.","サンクス！アイル ドゥ マイ ベスト","ありがとう！がんばるよ。"]
+  ]},
+  { id: "abroad", title: "外国の子と話す", emoji: "🌏", color: "var(--sunny)", level: "ちょいむず", lines: [
+    ["a","Where are you from?","ウェア アー ユー フロム？","どこから来たの？"],
+    ["b","I'm from Japan. Where are you from?","アイム フロム ジャパン。ウェア アー ユー フロム？","日本だよ。あなたは？"],
+    ["a","I'm from Canada. Do you like sports?","アイム フロム カナダ。ドゥ ユー ライク スポーツ？","カナダだよ。スポーツは好き？"],
+    ["b","Yes! I like swimming.","イエス！アイ ライク スイミング","うん！水泳が好きだよ。"]
+  ]}
+];
+
+/* ================= フレーズ ================= */
+const PHRASE_CATS = [
+  { name: "あいさつ", emoji: "🌞", phrases: [
+    ["Good morning!","グッド モーニング","おはよう！","🌅"],
+    ["Good afternoon!","グッド アフタヌーン","こんにちは！","🌤️"],
+    ["Good evening!","グッド イブニング","こんばんは！","🌆"],
+    ["Good night!","グッド ナイト","おやすみなさい！","🌙"],
+    ["Hello!","ハロー","こんにちは！","👋"],
+    ["How are you?","ハウ アー ユー？","元気？","🙂"],
+    ["I'm good, thank you!","アイム グッド、サンキュー","元気だよ、ありがとう！","😊"],
+    ["See you later!","スィー ユー レイター","またあとでね！","🙌"],
+    ["Have a nice day!","ハブ ア ナイス デイ","良い一日を！","🌈"],
+    ["Welcome!","ウェルカム","ようこそ！","🎊"]
+  ]},
+  { name: "おれい・あやまる", emoji: "🙏", phrases: [
+    ["Thank you so much!","サンキュー ソー マッチ","本当にありがとう！","💐"],
+    ["You're welcome.","ユア ウェルカム","どういたしまして。","😊"],
+    ["I'm sorry.","アイム ソーリー","ごめんなさい。","🙇"],
+    ["That's OK.","ザッツ オーケー","だいじょうぶだよ。","👌"],
+    ["Excuse me.","イクスキューズ ミー","すみません。","🙋"],
+    ["Here you are.","ヒア ユー アー","はい、どうぞ。","🎁"],
+    ["After you.","アフター ユー","お先にどうぞ。","🚪"]
+  ]},
+  { name: "へんじ・あいづち", emoji: "💬", phrases: [
+    ["Yes!","イエス","うん！","⭕"],
+    ["No.","ノー","ううん。","❌"],
+    ["OK!","オーケー","わかった！","👌"],
+    ["Sure!","シュア","もちろん！","✨"],
+    ["Of course!","オブ コース","もちろんだよ！","💯"],
+    ["Me too!","ミー トゥー","私も！","🙋"],
+    ["Really?","リアリー？","ほんとに？","😲"],
+    ["That's great!","ザッツ グレイト","すごいね！","🎉"],
+    ["I see.","アイ スィー","なるほど。","💡"],
+    ["Sounds good!","サウンズ グッド","いいね！","👍"]
+  ]},
+  { name: "しつもんする", emoji: "❓", phrases: [
+    ["What's this?","ワッツ ディス？","これ何？","🔍"],
+    ["Where is it?","ウェア イズ イット？","それどこにあるの？","📍"],
+    ["Who is that?","フー イズ ザット？","あの人だれ？","🤔"],
+    ["What time is it?","ワット タイム イズ イット？","今何時？","🕒"],
+    ["How much is it?","ハウ マッチ イズ イット？","いくらですか？","💰"],
+    ["Can you help me?","キャン ユー ヘルプ ミー？","手伝ってくれる？","🆘"],
+    ["May I come in?","メイ アイ カム イン？","入ってもいいですか？","🚪"],
+    ["Can I try?","キャン アイ トライ？","やってみてもいい？","🙋"]
+  ]},
+  { name: "こまったとき", emoji: "🆘", phrases: [
+    ["I don't understand.","アイ ドント アンダースタンド","わかりません。","😵"],
+    ["Please say that again.","プリーズ セイ ザット アゲイン","もう一度言ってください。","🔁"],
+    ["Please speak slowly.","プリーズ スピーク スローリー","ゆっくり話してください。","🐢"],
+    ["How do you say this in English?","ハウ ドゥ ユー セイ ディス イン イングリッシュ？","これは英語で何て言うの？","🗨️"],
+    ["What does it mean?","ワット ダズ イット ミーン？","どういう意味？","❓"],
+    ["I don't know.","アイ ドント ノウ","知らないなあ。","🤷"],
+    ["Just a minute.","ジャスト ア ミニット","ちょっと待ってね。","⏳"],
+    ["Help me, please!","ヘルプ ミー、プリーズ","助けてください！","🚨"]
+  ]},
+  { name: "きもちを言う", emoji: "💗", phrases: [
+    ["I'm happy!","アイム ハッピー","うれしい！","😄"],
+    ["I'm sleepy.","アイム スリーピー","ねむい。","😪"],
+    ["I'm hungry.","アイム ハングリー","おなかすいた。","🍙"],
+    ["I'm full.","アイム フル","おなかいっぱい。","😋"],
+    ["I'm so excited!","アイム ソー イクサイティッド","すっごくわくわくする！","🤩"],
+    ["I like it!","アイ ライク イット","気に入った！","💕"],
+    ["I did it!","アイ ディド イット","できたよ！","🏆"],
+    ["You can do it!","ユー キャン ドゥ イット","きみならできる！","💪"]
+  ]}
+];
+
+/* ================= じこしょうかいの選択肢 ================= */
+const LIKE_CHOICES = [
+  ["soccer","⚽ サッカー"],["baseball","⚾ 野球"],["swimming","🏊 水泳"],["dancing","💃 ダンス"],
+  ["drawing","🎨 お絵かき"],["music","🎵 音楽"],["video games","🎮 ゲーム"],["reading books","📚 読書"],
+  ["cooking","🍳 料理"],["animals","🐾 動物"]
+];
+const FOOD_CHOICES = [
+  ["sushi","🍣 おすし"],["ramen","🍜 ラーメン"],["curry and rice","🍛 カレー"],["fried chicken","🍗 からあげ"],
+  ["hamburgers","🍔 ハンバーガー"],["strawberries","🍓 いちご"],["ice cream","🍨 アイス"],["pizza","🍕 ピザ"]
+];
+
+/* ================= 音声（TTS） ================= */
+let enVoice = null;
+function pickVoice() {
+  if (!("speechSynthesis" in window)) return;
+  const voices = speechSynthesis.getVoices();
+  if (!voices.length) return;
+  enVoice =
+    voices.find(v => v.lang === "en-US" && /Samantha|Google US English/i.test(v.name)) ||
+    voices.find(v => v.lang === "en-US") ||
+    voices.find(v => v.lang && v.lang.startsWith("en")) ||
+    null;
+}
+if ("speechSynthesis" in window) {
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+}
+const PITCH_A = 1.1;
+const PITCH_B = 0.8;
+function makeUtterance(text, pitch) {
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  u.rate = 0.8;
+  u.pitch = pitch || 1;
+  if (enVoice) u.voice = enVoice;
+  return u;
+}
+function speak(text, pitch, onend) {
+  if (!("speechSynthesis" in window)) { if (onend) onend(); return; }
+  speechSynthesis.cancel();
+  const u = makeUtterance(text, pitch);
+  let done = false;
+  const fin = () => { if (!done) { done = true; if (onend) onend(); } };
+  u.onend = fin;
+  u.onerror = fin;
+  /* onend が来ない端末対策の保険 */
+  setTimeout(fin, 1200 + text.length * 130);
+  speechSynthesis.speak(u);
+}
+
+/* 効果音 */
+let audioCtx = null;
+function tone(freq, start, dur, type) {
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type || "sine";
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0.14, audioCtx.currentTime + start);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + start + dur);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(audioCtx.currentTime + start);
+  o.stop(audioCtx.currentTime + start + dur);
+}
+function playCorrect() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    tone(880, 0, 0.15); tone(1320, 0.13, 0.25);
+  } catch (e) {}
+}
+function playTryAgain() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    tone(330, 0, 0.2, "triangle");
+  } catch (e) {}
+}
+
+/* ================= 音声認識（聞き取り） ================= */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const hasSR = !!SR;
+if (!hasSR) document.getElementById("srWarn").style.display = "block";
+
+let activeRec = null;
+function stopListening() {
+  if (activeRec) { try { activeRec.abort(); } catch (e) {} activeRec = null; }
+}
+/* target に対して聞き取り→採点して cb({heard, score}) / エラー時 cb(null, errMsg) */
+function listenFor(target, ui, cb) {
+  if (!hasSR) { cb(null, "nosr"); return; }
+  stopListening();
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  const rec = new SR();
+  activeRec = rec;
+  rec.lang = "en-US";
+  rec.interimResults = true;
+  rec.maxAlternatives = 5;
+  rec.continuous = false;
+  let finals = [];
+  let gotResult = false;
+  rec.onresult = (ev) => {
+    let interim = "";
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      const r = ev.results[i];
+      if (r.isFinal) {
+        for (let j = 0; j < r.length; j++) finals.push(r[j].transcript);
+      } else {
+        interim += r[0].transcript;
+      }
+    }
+    if (interim && ui.onInterim) ui.onInterim(interim);
+  };
+  rec.onerror = (ev) => {
+    if (gotResult) return;
+    gotResult = true;
+    activeRec = null;
+    cb(null, ev.error);
+  };
+  rec.onend = () => {
+    if (gotResult) return;
+    gotResult = true;
+    activeRec = null;
+    if (!finals.length) { cb(null, "no-speech"); return; }
+    let best = { heard: finals[0], score: 0 };
+    finals.forEach(t => {
+      const s = matchScore(t, target);
+      if (s >= best.score) best = { heard: t, score: s };
+    });
+    cb(best, null);
+  };
+  try { rec.start(); if (ui.onStart) ui.onStart(); }
+  catch (e) { gotResult = true; activeRec = null; cb(null, "start-failed"); }
+}
+
+/* ---------- 採点 ---------- */
+const NUM_WORDS = { "1":"one","2":"two","3":"three","4":"four","5":"five","6":"six","7":"seven","8":"eight","9":"nine","10":"ten","11":"eleven","12":"twelve","13":"thirteen","14":"fourteen","15":"fifteen","16":"sixteen","17":"seventeen","18":"eighteen","19":"nineteen","20":"twenty" };
+const CONTRACTIONS = [
+  [/\bi'm\b/g,"i am"],[/\bit's\b/g,"it is"],[/\bthat's\b/g,"that is"],[/\bwhat's\b/g,"what is"],
+  [/\bwhere's\b/g,"where is"],[/\bwho's\b/g,"who is"],[/\bhow's\b/g,"how is"],[/\byou're\b/g,"you are"],
+  [/\bi'd\b/g,"i would"],[/\bi'll\b/g,"i will"],[/\bwe'll\b/g,"we will"],[/\bdon't\b/g,"do not"],
+  [/\bdoesn't\b/g,"does not"],[/\bcan't\b/g,"cannot"],[/\blet's\b/g,"let us"],[/\bok\b/g,"okay"]
+];
+function normalize(s) {
+  s = s.toLowerCase().replace(/[^a-z0-9' ]+/g, " ");
+  CONTRACTIONS.forEach(([re, to]) => { s = s.replace(re, to); });
+  s = s.split(/\s+/).filter(Boolean).map(w => NUM_WORDS[w] || w).join(" ");
+  return s;
+}
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  if (!m) return n; if (!n) return m;
+  let prev = new Array(n + 1);
+  for (let j = 0; j <= n; j++) prev[j] = j;
+  for (let i = 1; i <= m; i++) {
+    let cur = [i];
+    for (let j = 1; j <= n; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+function matchScore(heard, target) {
+  const h = normalize(heard), t = normalize(target);
+  if (!h || !t) return 0;
+  if (h === t) return 1;
+  const charSim = 1 - levenshtein(h, t) / Math.max(h.length, t.length);
+  const hw = h.split(" "), tw = t.split(" ");
+  const bag = {};
+  hw.forEach(w => { bag[w] = (bag[w] || 0) + 1; });
+  let hit = 0;
+  tw.forEach(w => { if (bag[w]) { hit++; bag[w]--; } });
+  const wordSim = (2 * hit) / (hw.length + tw.length);
+  return Math.max(charSim, wordSim);
+}
+function scoreToStars(score) {
+  if (score >= 0.82) return 3;
+  if (score >= 0.58) return 2;
+  if (score >= 0.34) return 1;
+  return 0;
+}
+const PRAISE_3 = ["パーフェクト！🎉","ネイティブみたい！✨","すばらしい発音！🌟"];
+const PRAISE_2 = ["いいね！ほとんど言えてる！👏","おしい！もう一回で完ぺき！💪"];
+const PRAISE_1 = ["伝わってきたよ！🔊を聞いてもう一度！","少し聞き取れたよ。ゆっくり言ってみよう！"];
+function pickMsg(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+/* ================= 保存 ================= */
+const KEY_STARS = "eikaiwa_scene_stars";   /* {sceneId: 星の数(会話ベスト)} */
+const KEY_PHRASE = "eikaiwa_phrases_done"; /* [en, ...] */
+const KEY_LOG = "eikaiwa_log";             /* {"2026-08-13": 言えた文の数} */
+const KEY_PROFILE = "eikaiwa_profile";
+function lsGet(k, fallback) {
+  try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? fallback : v; } catch (e) { return fallback; }
+}
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+let sceneStars = lsGet(KEY_STARS, {});
+let phrasesDone = new Set(lsGet(KEY_PHRASE, []));
+let dayLog = lsGet(KEY_LOG, {});
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function bumpLog() {
+  const k = todayKey();
+  dayLog[k] = (dayLog[k] || 0) + 1;
+  lsSet(KEY_LOG, dayLog);
+  updateStarCounter();
+}
+function totalStars() {
+  let n = 0;
+  Object.values(sceneStars).forEach(v => { n += v; });
+  n += phrasesDone.size;
+  return n;
+}
+function updateStarCounter() {
+  document.getElementById("starCounter").textContent = "⭐ " + totalStars();
+}
+
+/* ================= 画面切りかえ ================= */
+const SCREENS = ["screen-scenes","screen-role","screen-play","screen-phrases","screen-intro","screen-log"];
+function show(id) {
+  stopListening();
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  SCREENS.forEach(s => document.getElementById(s).classList.toggle("show", s === id));
+  const navMap = { "screen-scenes":"nav-scenes","screen-role":"nav-scenes","screen-play":"nav-scenes","screen-phrases":"nav-phrases","screen-intro":"nav-intro","screen-log":"nav-log" };
+  ["nav-scenes","nav-phrases","nav-intro","nav-log"].forEach(n =>
+    document.getElementById(n).classList.toggle("active", n === navMap[id]));
+  window.scrollTo(0, 0);
+}
+document.getElementById("nav-scenes").addEventListener("click", () => { renderSceneGrid(); show("screen-scenes"); });
+document.getElementById("nav-phrases").addEventListener("click", () => show("screen-phrases"));
+document.getElementById("nav-intro").addEventListener("click", () => show("screen-intro"));
+document.getElementById("nav-log").addEventListener("click", () => { renderLog(); show("screen-log"); });
+document.getElementById("starCounter").addEventListener("click", () => { renderLog(); show("screen-log"); });
+
+/* ================= シーン一覧 ================= */
+function renderSceneGrid() {
+  const grid = document.getElementById("sceneGrid");
+  grid.innerHTML = "";
+  SCENES.forEach(sc => {
+    const btn = document.createElement("button");
+    btn.className = "cat-card";
+    btn.style.background = sc.color;
+    const st = sceneStars[sc.id] || 0;
+    btn.innerHTML =
+      '<span class="cat-emoji">' + sc.emoji + '</span>' +
+      '<span class="cat-name">' + sc.title + '</span>' +
+      '<span class="cat-progress">' + (st ? "⭐".repeat(st) : sc.level) + '</span>';
+    btn.addEventListener("click", () => openRolePick(sc));
+    grid.appendChild(btn);
+  });
+}
+
+/* ================= 役えらび ================= */
+let curScene = null;
+function openRolePick(sc) {
+  curScene = sc;
+  document.getElementById("roleTitle").textContent = sc.emoji + " " + sc.title;
+  const pv = document.getElementById("rolePreview");
+  pv.innerHTML = "";
+  sc.lines.forEach(line => {
+    const p = document.createElement("p");
+    p.className = "preview-line";
+    p.innerHTML = (line[0] === "a" ? "🐰A: " : "🐻B: ") + "<b>" + line[1] + "</b>　" + line[3];
+    pv.appendChild(p);
+  });
+  show("screen-role");
+}
+document.getElementById("roleBack").addEventListener("click", () => show("screen-scenes"));
+document.getElementById("listenAll").addEventListener("click", () => {
+  if (!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  curScene.lines.forEach(line => {
+    speechSynthesis.speak(makeUtterance(line[1], line[0] === "a" ? PITCH_A : PITCH_B));
+  });
+});
+document.getElementById("roleA").addEventListener("click", () => startPlay("a"));
+document.getElementById("roleB").addEventListener("click", () => startPlay("b"));
+
+/* ================= ロールプレイ ================= */
+const play = { role: "b", idx: 0, earned: [], hardMode: false, finished: false };
+const chatArea = document.getElementById("chatArea");
+const turnPanel = document.getElementById("turnPanel");
+const finishCard = document.getElementById("finishCard");
+const micBtn = document.getElementById("turnMic");
+const micStatus = document.getElementById("micStatus");
+const heardBox = document.getElementById("heardBox");
+const resultStars = document.getElementById("resultStars");
+const resultMsg = document.getElementById("resultMsg");
+const selfCheckRow = document.getElementById("selfCheckRow");
+
+function startPlay(role) {
+  play.role = role;
+  play.idx = 0;
+  play.earned = [];
+  play.finished = false;
+  chatArea.innerHTML = "";
+  finishCard.style.display = "none";
+  turnPanel.style.display = "none";
+  show("screen-play");
+  setTimeout(step, 350);
+}
+document.getElementById("playBack").addEventListener("click", () => { openRolePick(curScene); });
+
+document.getElementById("hintToggle").addEventListener("click", (e) => {
+  play.hardMode = !play.hardMode;
+  e.currentTarget.classList.toggle("on", play.hardMode);
+  document.getElementById("turnEn").classList.toggle("hidden-en", play.hardMode);
+  document.getElementById("turnKana").style.visibility = play.hardMode ? "hidden" : "visible";
+});
+
+function appendBubble(line, mine, stars) {
+  const row = document.createElement("div");
+  row.className = "bubble-row " + (mine ? "me" : "them");
+  const face = document.createElement("div");
+  face.className = "bubble-face";
+  face.textContent = line[0] === "a" ? "🐰" : "🐻";
+  const b = document.createElement("div");
+  b.className = "bubble";
+  b.innerHTML = '<div class="b-en">' + line[1] + '</div>' +
+    '<div class="b-kana">' + line[2] + '</div>' +
+    '<div class="b-ja">' + line[3] + '</div>' +
+    (mine && stars != null ? '<div class="b-stars">' + (stars ? "⭐".repeat(stars) : "🙌 チャレンジした！") + '</div>' : "");
+  b.addEventListener("click", () => speak(line[1], line[0] === "a" ? PITCH_A : PITCH_B));
+  if (mine) { row.appendChild(b); row.appendChild(face); }
+  else { row.appendChild(face); row.appendChild(b); }
+  chatArea.appendChild(row);
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+}
+
+function step() {
+  if (play.finished) return;
+  if (play.idx >= curScene.lines.length) { finishScene(); return; }
+  const line = curScene.lines[play.idx];
+  if (line[0] !== play.role) {
+    /* アプリの番 */
+    turnPanel.style.display = "none";
+    appendBubble(line, false);
+    speak(line[1], line[0] === "a" ? PITCH_A : PITCH_B, () => {
+      play.idx++;
+      setTimeout(step, 500);
+    });
+  } else {
+    showYourTurn(line);
+  }
+}
+
+function showYourTurn(line) {
+  turnPanel.style.display = "block";
+  document.getElementById("turnEn").textContent = line[1];
+  document.getElementById("turnEn").classList.toggle("hidden-en", play.hardMode);
+  document.getElementById("turnKana").textContent = line[2];
+  document.getElementById("turnKana").style.visibility = play.hardMode ? "hidden" : "visible";
+  document.getElementById("turnJa").textContent = line[3];
+  micStatus.textContent = hasSR ? "🎤を押して、英語で言ってみよう" : "🔊で聞いて、声に出して言ってみよう";
+  heardBox.style.display = "none";
+  resultStars.textContent = "";
+  resultMsg.textContent = "";
+  selfCheckRow.style.display = hasSR ? "none" : "flex";
+  micBtn.style.display = hasSR ? "" : "none";
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+}
+
+document.getElementById("turnHear").addEventListener("click", () => {
+  const line = curScene.lines[play.idx];
+  if (line) speak(line[1], line[0] === "a" ? PITCH_A : PITCH_B);
+});
+document.getElementById("turnSkip").addEventListener("click", () => {
+  const line = curScene.lines[play.idx];
+  appendBubble(line, true, 0);
+  play.earned.push(0);
+  play.idx++;
+  turnPanel.style.display = "none";
+  setTimeout(step, 400);
+});
+document.getElementById("selfOk").addEventListener("click", () => {
+  const line = curScene.lines[play.idx];
+  playCorrect();
+  bumpLog();
+  appendBubble(line, true, 3);
+  play.earned.push(3);
+  play.idx++;
+  turnPanel.style.display = "none";
+  setTimeout(step, 500);
+});
+
+micBtn.addEventListener("click", () => {
+  if (activeRec) { stopListening(); micBtn.classList.remove("listening"); micStatus.textContent = "とちゅうでやめたよ"; return; }
+  const line = curScene.lines[play.idx];
+  if (!line) return;
+  heardBox.style.display = "none";
+  resultStars.textContent = "";
+  resultMsg.textContent = "";
+  listenFor(line[1], {
+    onStart: () => { micBtn.classList.add("listening"); micStatus.textContent = "きいてるよ…はなしてね 👂"; },
+    onInterim: (t) => { heardBox.style.display = "block"; heardBox.textContent = "きこえた: " + t; }
+  }, (res, err) => {
+    micBtn.classList.remove("listening");
+    if (err) { handleRecError(err, micStatus); return; }
+    heardBox.style.display = "block";
+    heardBox.textContent = "きこえた英語: " + res.heard;
+    const stars = scoreToStars(res.score);
+    if (stars >= 2) {
+      playCorrect();
+      bumpLog();
+      resultStars.textContent = "⭐".repeat(stars);
+      resultMsg.textContent = pickMsg(stars === 3 ? PRAISE_3 : PRAISE_2);
+      resultMsg.style.color = "#199A6C";
+      micStatus.textContent = "";
+      play.earned.push(stars);
+      setTimeout(() => {
+        appendBubble(line, true, stars);
+        play.idx++;
+        turnPanel.style.display = "none";
+        step();
+      }, 1100);
+    } else {
+      playTryAgain();
+      resultStars.textContent = stars === 1 ? "⭐" : "";
+      resultMsg.textContent = pickMsg(PRAISE_1);
+      resultMsg.style.color = "#B07900";
+      micStatus.textContent = "🎤でもう一度チャレンジ！（⏭️で先に進んでもOK）";
+    }
+  });
+});
+
+function handleRecError(err, statusEl) {
+  if (err === "not-allowed" || err === "service-not-allowed") {
+    statusEl.textContent = "マイクが使えないよ。ブラウザの設定でマイクを「許可」にしてね 🎤";
+  } else if (err === "no-speech") {
+    statusEl.textContent = "聞こえなかったよ。🎤を押してから、はっきり話してみてね";
+  } else if (err === "network") {
+    statusEl.textContent = "ネットにつながってないみたい。つないでからもう一度！";
+  } else {
+    statusEl.textContent = "うまく聞き取れなかったよ。もう一度🎤を押してみてね";
+  }
+}
+
+function finishScene() {
+  play.finished = true;
+  turnPanel.style.display = "none";
+  const total = play.earned.length;
+  const got = play.earned.reduce((a, b) => a + b, 0);
+  const max = total * 3;
+  const ratio = max ? got / max : 0;
+  const sceneStar = ratio >= 0.9 ? 3 : ratio >= 0.55 ? 2 : ratio > 0 ? 1 : 0;
+  if ((sceneStars[curScene.id] || 0) < sceneStar) {
+    sceneStars[curScene.id] = sceneStar;
+    lsSet(KEY_STARS, sceneStars);
+    updateStarCounter();
+  }
+  document.getElementById("finEmoji").textContent = sceneStar === 3 ? "🏆" : sceneStar === 2 ? "🎉" : "🌱";
+  document.getElementById("finScore").textContent = sceneStar ? "⭐".repeat(sceneStar) : "チャレンジ完了！";
+  document.getElementById("finMsg").textContent =
+    sceneStar === 3 ? "かんぺき！英語で会話できたね！" :
+    sceneStar === 2 ? "すごい！あと少しで満点だよ！" :
+    sceneStar === 1 ? "がんばったね！くり返すと上手になるよ！" :
+    "🔊で聞くところから始めてみよう！";
+  finishCard.style.display = "block";
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+}
+document.getElementById("finRetry").addEventListener("click", () => startPlay(play.role));
+document.getElementById("finSwitch").addEventListener("click", () => startPlay(play.role === "a" ? "b" : "a"));
+document.getElementById("finHome").addEventListener("click", () => { renderSceneGrid(); show("screen-scenes"); });
+
+/* ================= フレーズ ================= */
+function renderPhrases() {
+  const area = document.getElementById("phraseArea");
+  area.innerHTML = "";
+  PHRASE_CATS.forEach((cat, ci) => {
+    const box = document.createElement("div");
+    box.className = "ph-cat" + (ci === 0 ? " open" : "");
+    const doneCount = cat.phrases.filter(p => phrasesDone.has(p[0])).length;
+    const head = document.createElement("button");
+    head.className = "ph-cat-head";
+    head.innerHTML = '<span class="pc-emoji">' + cat.emoji + '</span>' + cat.name +
+      '<span class="pc-count">' + doneCount + "/" + cat.phrases.length + ' ✅</span>';
+    head.addEventListener("click", () => box.classList.toggle("open"));
+    box.appendChild(head);
+    const list = document.createElement("div");
+    list.className = "ph-list";
+    cat.phrases.forEach(p => list.appendChild(buildPhraseRow(p, head, cat)));
+    box.appendChild(list);
+    area.appendChild(box);
+  });
+}
+function buildPhraseRow(p, headEl, cat) {
+  const row = document.createElement("div");
+  row.className = "ph-row";
+  const main = document.createElement("div");
+  main.className = "ph-main";
+  main.innerHTML =
+    '<span class="ph-emoji">' + p[3] + '</span>' +
+    '<span class="ph-texts"><span class="ph-en">' + p[0] + '</span>' +
+    '<br><span class="ph-kana">' + p[1] + '</span>' +
+    '<br><span class="ph-ja">' + p[2] + '</span></span>';
+  const btns = document.createElement("div");
+  btns.className = "ph-btns";
+  const sp = document.createElement("button");
+  sp.className = "p-speak";
+  sp.textContent = "🔊";
+  sp.setAttribute("aria-label", "発音を聞く");
+  sp.addEventListener("click", () => speak(p[0]));
+  btns.appendChild(sp);
+  const done = document.createElement("span");
+  done.className = "ph-done";
+  done.textContent = phrasesDone.has(p[0]) ? "✅" : "";
+  const resBox = document.createElement("div");
+  resBox.className = "ph-result";
+  if (hasSR) {
+    const mic = document.createElement("button");
+    mic.className = "p-mic";
+    mic.textContent = "🎤";
+    mic.setAttribute("aria-label", "マイクで言ってみる");
+    mic.addEventListener("click", () => {
+      if (activeRec) { stopListening(); mic.classList.remove("listening"); return; }
+      document.querySelectorAll(".p-mic.listening").forEach(b => b.classList.remove("listening"));
+      resBox.style.display = "block";
+      resBox.innerHTML = "きいてるよ…はなしてね 👂";
+      listenFor(p[0], {
+        onStart: () => mic.classList.add("listening"),
+        onInterim: (t) => { resBox.innerHTML = '<span class="heard">きこえた: ' + t + "</span>"; }
+      }, (res, err) => {
+        mic.classList.remove("listening");
+        if (err) {
+          const tmp = document.createElement("div");
+          handleRecError(err, tmp);
+          resBox.innerHTML = tmp.textContent;
+          return;
+        }
+        const stars = scoreToStars(res.score);
+        if (stars >= 2) {
+          playCorrect();
+          if (!phrasesDone.has(p[0])) {
+            phrasesDone.add(p[0]);
+            lsSet(KEY_PHRASE, [...phrasesDone]);
+            done.textContent = "✅";
+            const dc = cat.phrases.filter(q => phrasesDone.has(q[0])).length;
+            headEl.querySelector(".pc-count").textContent = dc + "/" + cat.phrases.length + " ✅";
+            updateStarCounter();
+          }
+          bumpLog();
+          resBox.innerHTML = "⭐".repeat(stars) + " " + pickMsg(stars === 3 ? PRAISE_3 : PRAISE_2) +
+            '<br><span class="heard">きこえた英語: ' + res.heard + "</span>";
+        } else {
+          playTryAgain();
+          resBox.innerHTML = pickMsg(PRAISE_1) +
+            '<br><span class="heard">きこえた英語: ' + res.heard + "</span>";
+        }
+      });
+    });
+    btns.appendChild(mic);
+  }
+  btns.appendChild(done);
+  main.appendChild(btns);
+  row.appendChild(main);
+  row.appendChild(resBox);
+  return row;
+}
+
+/* ================= じこしょうかい ================= */
+let profile = lsGet(KEY_PROFILE, { name: "", age: 8, from: "", like: "", food: "" });
+function renderIntroForm() {
+  document.getElementById("inName").value = profile.name || "";
+  document.getElementById("inFrom").value = profile.from || "";
+  const ageRow = document.getElementById("ageChips");
+  ageRow.innerHTML = "";
+  for (let a = 5; a <= 15; a++) {
+    const c = document.createElement("button");
+    c.className = "chip" + (profile.age === a ? " sel" : "");
+    c.textContent = a;
+    c.addEventListener("click", () => {
+      profile.age = a;
+      ageRow.querySelectorAll(".chip").forEach(x => x.classList.remove("sel"));
+      c.classList.add("sel");
+    });
+    ageRow.appendChild(c);
+  }
+  const likeRow = document.getElementById("likeChips");
+  likeRow.innerHTML = "";
+  LIKE_CHOICES.forEach(([en, label]) => {
+    const c = document.createElement("button");
+    c.className = "chip" + (profile.like === en ? " sel" : "");
+    c.textContent = label;
+    c.addEventListener("click", () => {
+      profile.like = en;
+      document.getElementById("inLikeFree").value = "";
+      likeRow.querySelectorAll(".chip").forEach(x => x.classList.remove("sel"));
+      c.classList.add("sel");
+    });
+    likeRow.appendChild(c);
+  });
+  const foodRow = document.getElementById("foodChips");
+  foodRow.innerHTML = "";
+  FOOD_CHOICES.forEach(([en, label]) => {
+    const c = document.createElement("button");
+    c.className = "chip" + (profile.food === en ? " sel" : "");
+    c.textContent = label;
+    c.addEventListener("click", () => {
+      profile.food = en;
+      foodRow.querySelectorAll(".chip").forEach(x => x.classList.remove("sel"));
+      c.classList.add("sel");
+    });
+    foodRow.appendChild(c);
+  });
+}
+document.getElementById("buildIntro").addEventListener("click", () => {
+  profile.name = document.getElementById("inName").value.trim();
+  profile.from = document.getElementById("inFrom").value.trim();
+  const free = document.getElementById("inLikeFree").value.trim();
+  if (free) profile.like = free;
+  if (!profile.name) { alert("なまえをローマ字で入れてね！ れい: Haruto"); return; }
+  if (!profile.like) { alert("好きなことを1つえらんでね！"); return; }
+  if (!profile.food) { alert("好きな食べものをえらんでね！"); return; }
+  lsSet(KEY_PROFILE, profile);
+  renderIntroResult();
+});
+function introLines() {
+  const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+  const lines = [
+    ["Hello! My name is " + cap(profile.name) + ".", "こんにちは！私の名前は" + cap(profile.name) + "です。"],
+    ["I'm " + profile.age + " years old.", profile.age + "歳です。"]
+  ];
+  if (profile.from) lines.push(["I live in " + cap(profile.from) + ".", cap(profile.from) + "に住んでいます。"]);
+  lines.push(["I like " + profile.like + ".", profile.like + "が好きです。"]);
+  lines.push(["My favorite food is " + profile.food + ".", "好きな食べものは" + profile.food + "です。"]);
+  lines.push(["Nice to meet you!", "よろしくおねがいします！"]);
+  return lines;
+}
+function renderIntroResult() {
+  const box = document.getElementById("introResult");
+  box.innerHTML = "";
+  const card = document.createElement("div");
+  card.className = "form-card";
+  const h = document.createElement("div");
+  h.style.cssText = "font-weight:800;font-size:15px;margin-bottom:10px";
+  h.textContent = "🎀 あなたの自己紹介ができたよ！";
+  card.appendChild(h);
+  const lines = introLines();
+  lines.forEach(([en, ja]) => {
+    const row = document.createElement("div");
+    row.className = "intro-line";
+    const main = document.createElement("div");
+    main.className = "ph-main";
+    main.innerHTML = '<span class="ph-texts"><span class="ph-en">' + en + '</span><br><span class="ph-ja">' + ja + "</span></span>";
+    const btns = document.createElement("div");
+    btns.className = "ph-btns";
+    const sp = document.createElement("button");
+    sp.className = "p-speak";
+    sp.textContent = "🔊";
+    sp.addEventListener("click", () => speak(en));
+    btns.appendChild(sp);
+    const resBox = document.createElement("div");
+    resBox.className = "ph-result";
+    if (hasSR) {
+      const mic = document.createElement("button");
+      mic.className = "p-mic";
+      mic.textContent = "🎤";
+      mic.addEventListener("click", () => {
+        if (activeRec) { stopListening(); mic.classList.remove("listening"); return; }
+        resBox.style.display = "block";
+        resBox.innerHTML = "きいてるよ…はなしてね 👂";
+        listenFor(en, {
+          onStart: () => mic.classList.add("listening"),
+          onInterim: (t) => { resBox.innerHTML = '<span class="heard">きこえた: ' + t + "</span>"; }
+        }, (res, err) => {
+          mic.classList.remove("listening");
+          if (err) {
+            const tmp = document.createElement("div");
+            handleRecError(err, tmp);
+            resBox.innerHTML = tmp.textContent;
+            return;
+          }
+          const stars = scoreToStars(res.score);
+          if (stars >= 2) { playCorrect(); bumpLog(); }
+          else playTryAgain();
+          resBox.innerHTML = (stars ? "⭐".repeat(stars) + " " : "") +
+            pickMsg(stars >= 2 ? (stars === 3 ? PRAISE_3 : PRAISE_2) : PRAISE_1) +
+            '<br><span class="heard">きこえた英語: ' + res.heard + "</span>";
+        });
+      });
+      btns.appendChild(mic);
+    }
+    main.appendChild(btns);
+    row.appendChild(main);
+    row.appendChild(resBox);
+    card.appendChild(row);
+  });
+  const allBtn = document.createElement("div");
+  allBtn.style.cssText = "text-align:center;margin-top:12px";
+  allBtn.innerHTML = '<button class="btn-primary">▶ ぜんぶ通して聞く</button>';
+  allBtn.querySelector("button").addEventListener("click", () => {
+    if (!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    lines.forEach(([en]) => speechSynthesis.speak(makeUtterance(en)));
+  });
+  card.appendChild(allBtn);
+  box.appendChild(card);
+  box.scrollIntoView({ behavior: "smooth" });
+}
+
+/* ================= きろく ================= */
+function renderLog() {
+  document.getElementById("statToday").textContent = dayLog[todayKey()] || 0;
+  let total = 0;
+  Object.values(dayLog).forEach(v => { total += v; });
+  document.getElementById("statTotal").textContent = total;
+  document.getElementById("statStars").textContent = totalStars();
+  const list = document.getElementById("sceneStarList");
+  list.innerHTML = "";
+  SCENES.forEach(sc => {
+    const row = document.createElement("div");
+    row.className = "scene-star-row";
+    const st = sceneStars[sc.id] || 0;
+    row.innerHTML = "<span>" + sc.emoji + " " + sc.title + "</span><span>" + (st ? "⭐".repeat(st) : "—") + "</span>";
+    list.appendChild(row);
+  });
+}
+
+/* ---------- ひっこしコード ---------- */
+const portArea = document.getElementById("portArea");
+const portMsg = document.getElementById("portMsg");
+const importGo = document.getElementById("importGo");
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const data = { v: 1, stars: sceneStars, phrases: [...phrasesDone], log: dayLog, profile: profile };
+  portArea.style.display = "block";
+  importGo.style.display = "none";
+  portArea.value = "EIKAIWA1." + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  portArea.select();
+  portMsg.textContent = "このコードを全部コピーして、LINEのキープなどに貼っておいてね 📋";
+});
+document.getElementById("importBtn").addEventListener("click", () => {
+  portArea.style.display = "block";
+  portArea.value = "";
+  portArea.placeholder = "ここにコードを貼ってね";
+  importGo.style.display = "inline-block";
+  portMsg.textContent = "";
+  portArea.focus();
+});
+importGo.addEventListener("click", () => {
+  try {
+    const raw = portArea.value.trim();
+    if (!raw.startsWith("EIKAIWA1.")) throw new Error("bad");
+    const data = JSON.parse(decodeURIComponent(escape(atob(raw.slice(9)))));
+    sceneStars = data.stars || {};
+    phrasesDone = new Set(data.phrases || []);
+    dayLog = data.log || {};
+    if (data.profile) profile = data.profile;
+    lsSet(KEY_STARS, sceneStars);
+    lsSet(KEY_PHRASE, [...phrasesDone]);
+    lsSet(KEY_LOG, dayLog);
+    lsSet(KEY_PROFILE, profile);
+    updateStarCounter();
+    renderLog();
+    renderPhrases();
+    renderIntroForm();
+    portMsg.textContent = "きろくがもどったよ！おかえり 🎉";
+    portArea.style.display = "none";
+    importGo.style.display = "none";
+  } catch (e) {
+    portMsg.textContent = "コードが読めなかったよ。全部コピーできてるか確かめてね 🙏";
+  }
+});
+
+/* ================= 起動 ================= */
+renderSceneGrid();
+renderPhrases();
+renderIntroForm();
+updateStarCounter();
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
