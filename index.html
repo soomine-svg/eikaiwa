@@ -810,7 +810,10 @@ let activeRec = null;
 function stopListening() {
   if (activeRec) { try { activeRec.abort(); } catch (e) {} activeRec = null; }
 }
-/* target に対して聞き取り→採点して cb({heard, score}) / エラー時 cb(null, errMsg) */
+/* target に対して聞き取り→採点して cb({heard, score}) / エラー時 cb(null, errMsg)
+   iPhone対策: ①TTS停止直後はマイク切替に時間がかかるので350ms待って開始
+   ②continuous=true+無音タイマーで「一呼吸置いたら切れる」を防ぐ
+   ③finalが来ない端末用に最後のinterimを判定に使う */
 function listenFor(target, ui, cb) {
   if (!hasSR) { cb(null, "nosr"); return; }
   stopListening();
@@ -820,9 +823,18 @@ function listenFor(target, ui, cb) {
   rec.lang = "en-US";
   rec.interimResults = true;
   rec.maxAlternatives = 5;
-  rec.continuous = false;
+  rec.continuous = true;
   let finals = [];
-  let gotResult = false;
+  let lastInterim = "";
+  let done = false;
+  let silenceTimer = null, hardTimer = null;
+  const gentleStop = () => { try { rec.stop(); } catch (e) {} };
+  const armSilence = (ms) => { clearTimeout(silenceTimer); silenceTimer = setTimeout(gentleStop, ms); };
+  rec.onstart = () => {
+    if (ui.onStart) ui.onStart();
+    armSilence(7000);                      /* 話し始めるまで7秒待つ */
+    hardTimer = setTimeout(gentleStop, 15000);
+  };
   rec.onresult = (ev) => {
     let interim = "";
     for (let i = ev.resultIndex; i < ev.results.length; i++) {
@@ -833,28 +845,39 @@ function listenFor(target, ui, cb) {
         interim += r[0].transcript;
       }
     }
-    if (interim && ui.onInterim) ui.onInterim(interim);
+    if (interim) { lastInterim = interim; if (ui.onInterim) ui.onInterim(interim); }
+    armSilence(1800);                      /* 言い終わって1.8秒静かなら判定へ */
   };
   rec.onerror = (ev) => {
-    if (gotResult) return;
-    gotResult = true;
+    if (done) return;
+    done = true;
+    clearTimeout(silenceTimer); clearTimeout(hardTimer);
     activeRec = null;
     cb(null, ev.error);
   };
   rec.onend = () => {
-    if (gotResult) return;
-    gotResult = true;
+    if (done) return;
+    done = true;
+    clearTimeout(silenceTimer); clearTimeout(hardTimer);
     activeRec = null;
-    if (!finals.length) { cb(null, "no-speech"); return; }
-    let best = { heard: finals[0], score: 0 };
-    finals.forEach(t => {
+    const cands = finals.length ? finals : (lastInterim ? [lastInterim] : []);
+    if (!cands.length) { cb(null, "no-speech"); return; }
+    let best = { heard: cands[0], score: 0 };
+    cands.forEach(t => {
       const s = matchScore(t, target);
       if (s >= best.score) best = { heard: t, score: s };
     });
     cb(best, null);
   };
-  try { rec.start(); if (ui.onStart) ui.onStart(); }
-  catch (e) { gotResult = true; activeRec = null; cb(null, "start-failed"); }
+  setTimeout(() => {
+    if (activeRec !== rec || done) return;
+    try { rec.start(); }
+    catch (e) { done = true; activeRec = null; cb(null, "start-failed"); }
+  }, 350);
+}
+/* 聞き取り中にもう一度🎤 → 打ち切らず、そこまでの声で判定する */
+function finishListening() {
+  if (activeRec) { try { activeRec.stop(); } catch (e) {} }
 }
 
 /* ---------- 採点 ---------- */
@@ -1110,14 +1133,15 @@ document.getElementById("selfOk").addEventListener("click", () => {
 });
 
 micBtn.addEventListener("click", () => {
-  if (activeRec) { stopListening(); micBtn.classList.remove("listening"); micStatus.textContent = "とちゅうでやめたよ"; return; }
+  if (activeRec) { finishListening(); micStatus.textContent = "はんてい中…"; return; }
   const line = curScene.lines[play.idx];
   if (!line) return;
   heardBox.style.display = "none";
   resultStars.textContent = "";
   resultMsg.textContent = "";
+  micStatus.textContent = "マイクじゅんびちゅう…";
   listenFor(line[1], {
-    onStart: () => { micBtn.classList.add("listening"); micStatus.textContent = "きいてるよ…はなしてね 👂"; },
+    onStart: () => { micBtn.classList.add("listening"); micStatus.textContent = "きいてるよ！はなしてね 👂 言い終わったらもう一度🎤"; },
     onInterim: (t) => { heardBox.style.display = "block"; heardBox.textContent = "きこえた: " + t; }
   }, (res, err) => {
     micBtn.classList.remove("listening");
@@ -1238,12 +1262,12 @@ function buildPhraseRow(p, headEl, cat) {
     mic.textContent = "🎤";
     mic.setAttribute("aria-label", "マイクで言ってみる");
     mic.addEventListener("click", () => {
-      if (activeRec) { stopListening(); mic.classList.remove("listening"); return; }
+      if (activeRec) { finishListening(); resBox.innerHTML = "はんてい中…"; return; }
       document.querySelectorAll(".p-mic.listening").forEach(b => b.classList.remove("listening"));
       resBox.style.display = "block";
-      resBox.innerHTML = "きいてるよ…はなしてね 👂";
+      resBox.innerHTML = "マイクじゅんびちゅう…";
       listenFor(p[0], {
-        onStart: () => mic.classList.add("listening"),
+        onStart: () => { mic.classList.add("listening"); resBox.innerHTML = "きいてるよ！はなしてね 👂"; },
         onInterim: (t) => { resBox.innerHTML = '<span class="heard">きこえた: ' + t + "</span>"; }
       }, (res, err) => {
         mic.classList.remove("listening");
@@ -1382,11 +1406,11 @@ function renderIntroResult() {
       mic.className = "p-mic";
       mic.textContent = "🎤";
       mic.addEventListener("click", () => {
-        if (activeRec) { stopListening(); mic.classList.remove("listening"); return; }
+        if (activeRec) { finishListening(); resBox.innerHTML = "はんてい中…"; return; }
         resBox.style.display = "block";
-        resBox.innerHTML = "きいてるよ…はなしてね 👂";
+        resBox.innerHTML = "マイクじゅんびちゅう…";
         listenFor(en, {
-          onStart: () => mic.classList.add("listening"),
+          onStart: () => { mic.classList.add("listening"); resBox.innerHTML = "きいてるよ！はなしてね 👂"; },
           onInterim: (t) => { resBox.innerHTML = '<span class="heard">きこえた: ' + t + "</span>"; }
         }, (res, err) => {
           mic.classList.remove("listening");
