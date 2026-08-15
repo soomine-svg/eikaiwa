@@ -428,7 +428,35 @@
     display: none;
   }
 
+  /* ---------- 💡ワンポイントメモ（文法用語なし） ---------- */
+  .gram-hint {
+    font-size: 12px;
+    font-weight: 800;
+    color: #8A6100;
+    background: #FFF7E8;
+    border: 2px solid #FFE1A0;
+    border-radius: 12px;
+    padding: 6px 10px;
+    margin-top: 8px;
+    line-height: 1.6;
+    text-align: left;
+  }
+
   /* ---------- あなうめクイズ ---------- */
+  .mode-row { display: flex; gap: 8px; margin: 0 0 14px; }
+  .mode-pill {
+    flex: 1;
+    border: 3px solid var(--line);
+    background: var(--card);
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 10px 8px;
+    cursor: pointer;
+  }
+  .mode-pill.active { border-color: var(--mint); color: #199A6C; background: #E7F8F0; }
   .quiz-progress { display: flex; gap: 5px; justify-content: center; margin: 6px 0 14px; }
   .quiz-progress span { width: 12px; height: 12px; border-radius: 999px; background: var(--line); }
   .quiz-progress span.hit { background: var(--mint); }
@@ -511,6 +539,7 @@
         <div class="turn-kana" id="turnKana"></div>
         <div class="turn-ja" id="turnJa"></div>
         <div class="turn-native" id="turnNative" style="display:none"></div>
+        <div class="gram-hint" id="turnHint" style="display:none"></div>
         <div class="mic-row">
           <button class="round-btn btn-hear" id="turnHear" aria-label="お手本を聞く">🔊</button>
           <button class="round-btn btn-mic" id="turnMic" aria-label="マイクで話す">🎤</button>
@@ -593,6 +622,11 @@
     <section class="screen" id="screen-cloze">
       <h2 class="title">あなうめクイズ 🧩</h2>
       <p class="note">文の ＿＿＿ に入ることばをえらぼう！（全10問）<br>まちがえた文は「にがてれんしゅう」に入るよ</p>
+      <div class="mode-row">
+        <button class="mode-pill active" id="clzModeWord">🧩 ことば</button>
+        <button class="mode-pill" id="clzModeGram">🏅 文法チャレンジ</button>
+      </div>
+      <p class="note" id="clzModeNote" style="display:none">「もう終わった話ならどの形？」みたいな、<br>ことばの形をえらぶ特訓だよ。💡がヒント！</p>
       <div id="clzStart" style="text-align:center;margin-top:14px">
         <button class="btn-primary" id="clzGo">スタート！</button>
       </div>
@@ -605,6 +639,7 @@
         </div>
         <div class="choices" id="clzChoices"></div>
         <div class="quiz-feedback" id="clzFeedback"></div>
+        <div class="gram-hint" id="clzHint" style="display:none"></div>
         <div style="text-align:center;margin-top:10px"><button class="btn-primary" id="clzNext" style="display:none">次へ ▶</button></div>
       </div>
       <div class="finish-card" id="clzResult" style="display:none">
@@ -757,6 +792,43 @@ const SCENES = [
     ["b","I'm from Japan. Where are you from?","アイム フロム ジャパン。ウェア アー ユー フロム？","日本だよ。あなたは？"],
     ["a","I'm from Canada. Do you like sports?","アイム フロム カナダ。ドゥ ユー ライク スポーツ？","カナダだよ。スポーツは好き？"],
     ["b","Yes! I like swimming.","イエス！アイ ライク スイミング","うん！水泳が好きだよ。"]
+  ]},
+  /* ---- 英検3級レベル（💡=文法用語を使わないワンポイント） ---- */
+  { id: "g3weekend", title: "週末の思い出", emoji: "🎡", color: "var(--sunny)", level: "英検3級", lines: [
+    ["a","How was your weekend?","ハウ ワズ ユア ウィーケンド？","週末はどうだった？",null,"⏪ was = 「〜だった」。終わったことを聞いてるよ"],
+    ["b","It was great! I went to the zoo with my family.","イット ワズ グレイト！アイ ウェント トゥ ザ ズー ウィズ マイ ファミリー","最高だったよ！家族で動物園に行ったんだ。",null,"⏪ went = go の「もう終わった」形"],
+    ["a","Nice! What animals did you see?","ナイス！ワット アニマルズ ディド ユー スィー？","いいね！どんな動物を見たの？",null,"⏪ did をつけると「終わったこと」の質問になるよ"],
+    ["b","We saw pandas. They were so cute!","ウィー ソー パンダズ。ゼイ ワー ソー キュート","パンダを見たよ。すっごくかわいかった！",null,"⏪ saw = see の「もう終わった」形"]
+  ]},
+  { id: "g3ever", title: "行ったことある？", emoji: "✈️", color: "var(--coral)", level: "英検3級", lines: [
+    ["a","Have you ever been to Tokyo?","ハブ ユー エバー ビーン トゥ トーキョー？","東京に行ったことある？",null,"❓ Have you ever...? = 「〜したことある？」"],
+    ["b","Yes, I have. I went there last year.","イエス、アイ ハブ。アイ ウェント ゼア ラスト イヤー","うん、あるよ。去年行ったんだ。",null,"⏪ last year（去年）の話だから went"],
+    ["a","How was it?","ハウ ワズ イット？","どうだった？"],
+    ["b","It was exciting, but it was very crowded.","イット ワズ イクサイティング、バット イット ワズ ベリー クラウディッド","わくわくしたよ。でもすごく混んでた。",null,"🔀 but = 「でも」"]
+  ]},
+  { id: "g3summer", title: "夏休みの予定", emoji: "⛱️", color: "var(--sky)", level: "英検3級", lines: [
+    ["a","What are you going to do this summer?","ワット アー ユー ゴーイング トゥ ドゥ ディス サマー？","この夏は何をするつもり？",null,"⏩ be going to = 「これからの予定」"],
+    ["b","I'm going to visit my grandma in Osaka.","アイム ゴーイング トゥ ビジット マイ グランマ イン オーサカ","大阪のおばあちゃんの家に行くんだ。"],
+    ["a","Sounds fun! How long will you stay?","サウンズ ファン！ハウ ロング ウィル ユー ステイ？","楽しそう！どのくらい泊まるの？",null,"⏩ will も「これからのこと」に使うよ"],
+    ["b","I'll stay for a week.","アイル ステイ フォー ア ウィーク","1週間泊まるよ。"]
+  ]},
+  { id: "g3which", title: "どっちが好き？", emoji: "⚖️", color: "var(--lavender)", level: "英検3級", lines: [
+    ["a","Which do you like better, summer or winter?","ウィッチ ドゥ ユー ライク ベター、サマー オア ウィンター？","夏と冬、どっちが好き？",null,"⚖️ like ○○ better = 「○○のほうが好き」"],
+    ["b","I like summer better because I can swim in the sea.","アイ ライク サマー ベター ビコーズ アイ キャン スイム イン ザ スィー","海で泳げるから夏のほうが好き。",null,"🤔 because = 「だって〜だから」"],
+    ["a","I see. For me, winter is better than summer.","アイ スィー。フォー ミー、ウィンター イズ ベター ザン サマー","なるほど。私は夏より冬がいいな。",null,"⚖️ better than = 「〜よりいい」"],
+    ["b","Really? Winter is too cold for me!","リアリー？ウィンター イズ トゥー コールド フォー ミー","ほんと？冬は寒すぎるよ！",null,"🥶 too ○○ = 「○○すぎる」"]
+  ]},
+  { id: "g3keep", title: "ずっとつづけてること", emoji: "🎹", color: "var(--mint)", level: "英検3級", lines: [
+    ["a","You're really good at the piano!","ユア リアリー グッド アット ザ ピアノ","ピアノ、本当に上手だね！",null,"💪 good at ○○ = 「○○がとくい」"],
+    ["b","Thank you. I have practiced it for five years.","サンキュー。アイ ハブ プラクティスト イット フォー ファイブ イヤーズ","ありがとう。5年間ずっと練習してるんだ。",null,"🔁 have + ○○ = 「前から今までずっと」"],
+    ["a","Wow! When did you start?","ワオ！ウェン ディド ユー スタート？","すごい！いつ始めたの？"],
+    ["b","I started when I was seven.","アイ スターティッド ウェン アイ ワズ セブン","7歳のときに始めたよ。",null,"⏰ when I was ○○ = 「○○歳のとき」"]
+  ]},
+  { id: "g3rain", title: "雨の日のやさしさ", emoji: "☔", color: "var(--peach)", level: "英検3級", lines: [
+    ["a","Oh no, it's raining. I don't have an umbrella.","オー ノー、イッツ レイニング。アイ ドント ハブ アン アンブレラ","あーあ、雨だ。かさ持ってないよ。"],
+    ["b","Don't worry. You can use mine.","ドント ウォーリー。ユー キャン ユーズ マイン","心配しないで。私のを使っていいよ。",null,"🎁 mine = 「私のもの」"],
+    ["a","Thank you! But what will you do?","サンキュー！バット ワット ウィル ユー ドゥ？","ありがとう！でもあなたはどうするの？"],
+    ["b","I have to wait here until it stops.","アイ ハブ トゥ ウェイト ヒア アンティル イット ストップス","やむまでここで待たなきゃ。",null,"😤 have to = 「〜しなきゃ」"]
   ]}
 ];
 
@@ -824,6 +896,18 @@ const PHRASE_CATS = [
     ["I like it!","アイ ライク イット","気に入った！","💕"],
     ["I did it!","アイ ディド イット","できたよ！","🏆","Nailed it!"],
     ["You can do it!","ユー キャン ドゥ イット","きみならできる！","💪","You got this!"]
+  ]},
+  { name: "英検3級チャレンジ", emoji: "🏅", phrases: [
+    ["I went shopping with my mom yesterday.","アイ ウェント ショッピング ウィズ マイ マム イエスタデイ","きのうお母さんと買い物に行ったよ。","🛍️",null,"⏪ went = go の「もう終わった」形"],
+    ["I have never seen it before.","アイ ハブ ネバー スィーン イット ビフォー","前に一度も見たことないよ。","👀",null,"🔁 have never + ○○ = 「一度も〜したことない」"],
+    ["I'm going to study English tonight.","アイム ゴーイング トゥ スタディ イングリッシュ トゥナイト","今夜は英語を勉強するつもり。","📖",null,"⏩ be going to = 「これからの予定」"],
+    ["I want to be a singer in the future.","アイ ウォント トゥ ビー ア シンガー イン ザ フューチャー","将来は歌手になりたいな。","🎤",null,"💫 want to be = 「〜になりたい」"],
+    ["I stayed home because it was raining.","アイ ステイド ホーム ビコーズ イット ワズ レイニング","雨だったから家にいたよ。","🏠",null,"🤔 because = 「だって〜だから」"],
+    ["This one is bigger than that one.","ディス ワン イズ ビガー ザン ザット ワン","こっちのほうがあっちより大きいよ。","⚖️",null,"⚖️ bigger than = 「〜より大きい」"],
+    ["I have to do my homework first.","アイ ハブ トゥ ドゥ マイ ホームワーク ファースト","先に宿題をやらなきゃ。","📝",null,"😤 have to = 「〜しなきゃ」"],
+    ["When I was five, I lived in Fukuoka.","ウェン アイ ワズ ファイブ、アイ リブド イン フクオカ","5歳のとき、福岡に住んでたんだ。","🏡",null,"⏰ when I was ○○ = 「○○歳のとき」"],
+    ["If it's sunny tomorrow, let's go to the park.","イフ イッツ サニー トゥモロー、レッツ ゴー トゥ ザ パーク","明日晴れたら公園に行こうよ。","🌳",null,"🤞 if = 「もし〜なら」"],
+    ["I enjoyed talking with you today.","アイ エンジョイド トーキング ウィズ ユー トゥデイ","今日は話せて楽しかったよ。","😊",null,"🎈 enjoy + 〜ing = 「〜して楽しむ」"]
   ]}
 ];
 
@@ -1173,7 +1257,8 @@ function openRolePick(sc) {
   sc.lines.forEach(line => {
     const p = document.createElement("p");
     p.className = "preview-line";
-    p.innerHTML = (line[0] === "a" ? "🐰A: " : "🐻B: ") + "<b>" + line[1] + "</b>　" + line[3];
+    p.innerHTML = (line[0] === "a" ? "🐰A: " : "🐻B: ") + "<b>" + line[1] + "</b>　" + line[3] +
+      (line[5] ? '<br><span style="color:#8A6100">💡 ' + line[5] + "</span>" : "");
     pv.appendChild(p);
   });
   show("screen-role");
@@ -1272,6 +1357,13 @@ function showYourTurn(line) {
   } else {
     tn.style.display = "none";
     tn.onclick = null;
+  }
+  const th = document.getElementById("turnHint");
+  if (line[5]) {
+    th.style.display = "block";
+    th.textContent = "💡 " + line[5];
+  } else {
+    th.style.display = "none";
   }
   micStatus.textContent = hasSR ? "🎤を押して、英語で言ってみよう" : "🔊で聞いて、声に出して言ってみよう";
   heardBox.style.display = "none";
@@ -1488,6 +1580,12 @@ function buildPhraseRow(p, headEl, cat) {
     nat.textContent = "🇺🇸 現地ではこう言うよ: " + p[4] + " 🔊";
     nat.addEventListener("click", () => speak(p[4]));
     row.appendChild(nat);
+  }
+  if (p[5]) {
+    const hint = document.createElement("div");
+    hint.className = "gram-hint";
+    hint.textContent = "💡 " + p[5];
+    row.appendChild(hint);
   }
   row.appendChild(resBox);
   return row;
@@ -1851,7 +1949,45 @@ function makeClozeQ(item) {
   const wrongs = near.concat(far).slice(0, 3);
   return { item, ans, disp, choices: shuffle([ans, ...wrongs]) };
 }
+/* ---- 文法チャレンジの問題（文法用語なし・💡は感覚のことばだけ） ---- */
+const GRAMMAR_QS = [
+  { en: "I ___ soccer yesterday.", full: "I played soccer yesterday.", ja: "きのうサッカーをしたよ。", ans: "played", wrongs: ["play","playing","plays"], hint: "⏪ yesterday（きのう）の話は「もう終わった」形の played" },
+  { en: "It ___ sunny yesterday.", full: "It was sunny yesterday.", ja: "きのうは晴れだったよ。", ans: "was", wrongs: ["is","are","be"], hint: "⏪ 「〜だった」は was" },
+  { en: "She ___ to school every day.", full: "She goes to school every day.", ja: "彼女は毎日学校に行くよ。", ans: "goes", wrongs: ["go","going","went"], hint: "🔂 she や he が「いつもすること」は goes みたいに s の形" },
+  { en: "My brother ___ a dog.", full: "My brother has a dog.", ja: "お兄ちゃんは犬を飼ってるよ。", ans: "has", wrongs: ["have","having","had"], hint: "🔂 she・he・お兄ちゃん1人のときは have じゃなくて has" },
+  { en: "Look! The baby ___ sleeping now.", full: "Look! The baby is sleeping now.", ja: "見て！赤ちゃんが今ねてるよ。", ans: "is", wrongs: ["are","do","was"], hint: "👀 「今まさに〜してる」は is + 〜ing" },
+  { en: "I ___ my homework last night.", full: "I did my homework last night.", ja: "昨日の夜、宿題をやったよ。", ans: "did", wrongs: ["do","does","doing"], hint: "⏪ last night（昨日の夜）だから「終わった」形の did" },
+  { en: "We ___ a movie last Sunday.", full: "We saw a movie last Sunday.", ja: "この前の日曜、映画を見たよ。", ans: "saw", wrongs: ["see","sees","seeing"], hint: "⏪ saw = see の「もう終わった」形" },
+  { en: "I ___ in Miyazaki for ten years.", full: "I have lived in Miyazaki for ten years.", ja: "宮崎に10年間ずっと住んでるよ。", ans: "have lived", wrongs: ["live","living","lives"], hint: "🔁 「前から今までずっと」は have + ○○" },
+  { en: "I ___ to Okinawa twice.", full: "I have been to Okinawa twice.", ja: "沖縄に2回行ったことがあるよ。", ans: "have been", wrongs: ["go","going","gone"], hint: "🔁 「行ったことがある」は have been to" },
+  { en: "___ you ever eaten sushi?", full: "Have you ever eaten sushi?", ja: "おすしを食べたことある？", ans: "Have", wrongs: ["Do","Did","Are"], hint: "❓ 「〜したことある？」は Have you ever...?" },
+  { en: "It ___ rainy tomorrow.", full: "It will be rainy tomorrow.", ja: "明日は雨になるよ。", ans: "will be", wrongs: ["is","was","be"], hint: "⏩ tomorrow（明日）の話は will" },
+  { en: "I'm ___ to visit Kyoto next week.", full: "I'm going to visit Kyoto next week.", ja: "来週、京都に行く予定だよ。", ans: "going", wrongs: ["go","went","goes"], hint: "⏩ be going to = 「これからの予定」" },
+  { en: "She can ___ the piano very well.", full: "She can play the piano very well.", ja: "彼女はピアノがとても上手にひけるよ。", ans: "play", wrongs: ["plays","playing","played"], hint: "🎵 can のあとは、いつも「もとの形」" },
+  { en: "I want ___ a vet.", full: "I want to be a vet.", ja: "獣医になりたいな。", ans: "to be", wrongs: ["be","being","am"], hint: "💫 「〜になりたい」は want to be" },
+  { en: "I like ___ pictures.", full: "I like drawing pictures.", ja: "絵をかくのが好きだよ。", ans: "drawing", wrongs: ["draw","draws","drew"], hint: "🎈 like + 〜ing = 「〜するのが好き」" },
+  { en: "My bag is ___ than yours.", full: "My bag is bigger than yours.", ja: "私のかばんはあなたのより大きいよ。", ans: "bigger", wrongs: ["big","biggest","more big"], hint: "⚖️ 「〜より大きい」は bigger than" },
+  { en: "This is the ___ cake in this shop.", full: "This is the best cake in this shop.", ja: "これはこのお店でいちばんおいしいケーキだよ。", ans: "best", wrongs: ["good","better","well"], hint: "👑 「いちばん」は the best" },
+  { en: "I like summer ___ than winter.", full: "I like summer better than winter.", ja: "冬より夏のほうが好きだな。", ans: "better", wrongs: ["good","best","well"], hint: "⚖️ 「〜のほうが好き」は like ○○ better" },
+  { en: "We stayed home ___ it was raining.", full: "We stayed home because it was raining.", ja: "雨だったから家にいたよ。", ans: "because", wrongs: ["but","so","or"], hint: "🤔 「だって〜だから」は because" },
+  { en: "___ you are free tomorrow, let's play.", full: "If you are free tomorrow, let's play.", ja: "明日ひまなら、遊ぼうよ。", ans: "If", wrongs: ["But","So","Or"], hint: "🤞 「もし〜なら」は if" },
+  { en: "___ I was five, I lived in Tokyo.", full: "When I was five, I lived in Tokyo.", ja: "5歳のとき、東京に住んでたよ。", ans: "When", wrongs: ["What","Who","How"], hint: "⏰ 「〜のとき」は when" },
+  { en: "There ___ four people in my family.", full: "There are four people in my family.", ja: "うちは4人家族だよ。", ans: "are", wrongs: ["is","am","be"], hint: "👨‍👩‍👧‍👦 2人以上いるときは are" },
+  { en: "I ___ get up early tomorrow.", full: "I have to get up early tomorrow.", ja: "明日は早起きしなきゃ。", ans: "have to", wrongs: ["want","like to","going"], hint: "😤 「〜しなきゃ」は have to" },
+  { en: "I enjoyed ___ with you today.", full: "I enjoyed talking with you today.", ja: "今日は話せて楽しかったよ。", ans: "talking", wrongs: ["talk","talked","to talk"], hint: "🎈 enjoy のあとは 〜ing の形" }
+];
+
 let clz = null;
+let clozeMode = "word"; /* word | gram */
+function setClozeMode(m) {
+  clozeMode = m;
+  document.getElementById("clzModeWord").classList.toggle("active", m === "word");
+  document.getElementById("clzModeGram").classList.toggle("active", m === "gram");
+  document.getElementById("clzModeNote").style.display = m === "gram" ? "block" : "none";
+  resetCloze();
+}
+document.getElementById("clzModeWord").addEventListener("click", () => setClozeMode("word"));
+document.getElementById("clzModeGram").addEventListener("click", () => setClozeMode("gram"));
 function resetCloze() {
   stopListening();
   clz = null;
@@ -1860,7 +1996,18 @@ function resetCloze() {
   document.getElementById("clzResult").style.display = "none";
 }
 function startCloze() {
-  const qs = shuffle(clozePool()).slice(0, 10).map(makeClozeQ);
+  let qs;
+  if (clozeMode === "gram") {
+    qs = shuffle(GRAMMAR_QS).slice(0, 10).map(g => ({
+      item: { en: g.full, kana: "", ja: g.ja },
+      ans: g.ans,
+      disp: g.en.replace("___", "＿＿＿"),
+      choices: shuffle([g.ans, ...g.wrongs]),
+      hint: g.hint
+    }));
+  } else {
+    qs = shuffle(clozePool()).slice(0, 10).map(makeClozeQ);
+  }
   clz = { qs, i: 0, results: [] };
   document.getElementById("clzStart").style.display = "none";
   document.getElementById("clzResult").style.display = "none";
@@ -1881,6 +2028,7 @@ function renderClozeQ() {
   document.getElementById("clzEn").textContent = q.disp;
   document.getElementById("clzHear").style.display = "none"; /* 答え合わせまで🔊は出さない */
   document.getElementById("clzFeedback").textContent = "";
+  document.getElementById("clzHint").style.display = "none";
   document.getElementById("clzNext").style.display = "none";
   const box = document.getElementById("clzChoices");
   box.innerHTML = "";
@@ -1914,6 +2062,11 @@ function answerCloze(btn, c, q) {
     fb.style.color = "var(--coral)";
     playTryAgain();
     weakMark(q.item.en, q.item.kana, q.item.ja); /* まちがえた文は「にがてれんしゅう」へ */
+  }
+  if (q.hint) {
+    const h = document.getElementById("clzHint");
+    h.style.display = "block";
+    h.textContent = "💡 " + q.hint;
   }
   speak(q.item.en);
   document.getElementById("clzNext").style.display = "inline-block";
