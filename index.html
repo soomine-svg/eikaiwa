@@ -546,19 +546,42 @@
     <!-- じこしょうかい -->
     <section class="screen" id="screen-intro">
       <h2 class="title">じこしょうかいを作ろう 🙋</h2>
-      <p class="note">えらんだり書いたりすると、あなただけの<br>自己紹介が英語でできあがるよ！</p>
+      <p class="note">えらんだり書いたりすると、<b>英検3級レベル</b>の<br>本かくてきな自己紹介ができあがるよ！<br>（⭕のところ以外は、とばしてもOK）</p>
       <div class="form-card">
-        <div class="f-label">なまえ（ローマ字で）</div>
+        <div class="f-label">⭕ なまえ（ローマ字で）</div>
         <input class="f-input" id="inName" placeholder="れい: Haruto" autocomplete="off" autocapitalize="words">
-        <div class="f-label">なんさい？</div>
+        <div class="f-label">よび名（あだ名・とばしてもOK）</div>
+        <input class="f-input" id="inNick" placeholder="れい: Haru → Please call me Haru." autocomplete="off" autocapitalize="words">
+        <div class="f-label">⭕ なんさい？</div>
         <div class="chip-row" id="ageChips"></div>
-        <div class="f-label">どこに住んでる？（ローマ字で・とばしてもOK）</div>
+        <div class="f-label">学年</div>
+        <div class="chip-row" id="gradeChips"></div>
+        <div class="f-label">どこに住んでる？（ローマ字で）</div>
         <input class="f-input" id="inFrom" placeholder="れい: Miyazaki" autocomplete="off" autocapitalize="words">
-        <div class="f-label">好きなこと（1つえらぶ or 書く）</div>
+        <div class="f-label">その町のじまん（It's famous for ...）</div>
+        <div class="chip-row" id="famousChips"></div>
+        <div class="f-label">なん人家族？</div>
+        <div class="chip-row" id="familyChips"></div>
+        <div class="f-label">ペットはいる？</div>
+        <div class="chip-row" id="petChips"></div>
+        <div class="f-label">⭕ 好きなこと（1つえらぶ or 書く）</div>
         <div class="chip-row" id="likeChips"></div>
         <input class="f-input" id="inLikeFree" placeholder="ほかの好きなこと（英語で）" autocomplete="off" style="margin-top:6px">
-        <div class="f-label">好きな食べもの</div>
+        <div class="f-label">それを何年つづけてる？（現在完了で言えるよ）</div>
+        <div class="chip-row" id="yearsChips"></div>
+        <div class="f-label">得意なこと（I'm good at ...）</div>
+        <div class="chip-row" id="goodatChips"></div>
+        <div class="f-label">いちばん好きな教科</div>
+        <div class="chip-row" id="subjectChips"></div>
+        <div class="f-label">その理由（because ...）</div>
+        <div class="chip-row" id="subjReasonChips"></div>
+        <div class="f-label">⭕ 好きな食べもの</div>
         <div class="chip-row" id="foodChips"></div>
+        <div class="f-label">将来の夢（I want to be ...）</div>
+        <div class="chip-row" id="dreamChips"></div>
+        <input class="f-input" id="inDreamFree" placeholder="ほかの夢（英語で・れい: an astronaut）" autocomplete="off" style="margin-top:6px">
+        <div class="f-label">夢の理由（because ...）</div>
+        <div class="chip-row" id="dreamReasonChips"></div>
         <div style="text-align:center;margin-top:16px">
           <button class="btn-primary" id="buildIntro">✨ 自己紹介を作る</button>
         </div>
@@ -804,7 +827,7 @@ const PHRASE_CATS = [
   ]}
 ];
 
-/* ================= じこしょうかいの選択肢 ================= */
+/* ================= じこしょうかいの選択肢（英検3級レベル） ================= */
 const LIKE_CHOICES = [
   ["soccer","⚽ サッカー"],["baseball","⚾ 野球"],["swimming","🏊 水泳"],["dancing","💃 ダンス"],
   ["drawing","🎨 お絵かき"],["music","🎵 音楽"],["video games","🎮 ゲーム"],["reading books","📚 読書"],
@@ -814,6 +837,46 @@ const FOOD_CHOICES = [
   ["sushi","🍣 おすし"],["ramen","🍜 ラーメン"],["curry and rice","🍛 カレー"],["fried chicken","🍗 からあげ"],
   ["hamburgers","🍔 ハンバーガー"],["strawberries","🍓 いちご"],["ice cream","🍨 アイス"],["pizza","🍕 ピザ"]
 ];
+const GRADE_CHOICES = [
+  ["the fifth grade of elementary school","小5"],
+  ["the sixth grade of elementary school","小6"],
+  ["the first year of junior high school","中1"],
+  ["the second year of junior high school","中2"],
+  ["the third year of junior high school","中3"]
+];
+const FAMOUS_CHOICES = [
+  ["its beautiful nature","🌳 自然がきれい"],["its delicious food","😋 食べ物がおいしい"],
+  ["its hot springs","♨️ 温泉"],["its beautiful sea","🌊 海がきれい"],
+  ["its high mountains","⛰️ 山"],["its friendly people","🥰 人があたたかい"]
+];
+const PET_CHOICES = [
+  ["a dog","🐶 犬"],["a cat","🐱 ねこ"],["a bird","🐤 鳥"],
+  ["some fish","🐟 魚"],["a hamster","🐹 ハムスター"],["a rabbit","🐰 うさぎ"]
+];
+const GOODAT_CHOICES = [
+  ["singing","🎤 歌うこと"],["drawing pictures","🖍️ 絵をかくこと"],["cooking","🍳 料理"],
+  ["running fast","🏃 速く走ること"],["playing video games","🎮 ゲーム"],
+  ["speaking English","🗣️ 英語を話すこと"],["swimming","🏊 泳ぐこと"],["making people laugh","🤣 人を笑わせること"]
+];
+const SUBJECT_CHOICES = [
+  ["English","🔤 英語"],["math","➗ 算数・数学"],["science","🔬 理科"],["Japanese","📖 国語"],
+  ["social studies","🌏 社会"],["music","🎵 音楽"],["P.E.","🏅 体育"],["arts and crafts","🎨 図工"]
+];
+const SUBJ_REASON_CHOICES = [
+  ["it's a lot of fun","とても楽しいから"],["it's very interesting","とても面白いから"],
+  ["I'm good at it","得意だから"],["my teacher is really nice","先生がすてきだから"]
+];
+const DREAM_CHOICES = [
+  ["a vet","🐾 獣医"],["a teacher","🏫 先生"],["a soccer player","⚽ サッカー選手"],
+  ["a doctor","🩺 医者"],["a game designer","🎮 ゲームデザイナー"],["a nurse","💉 看護師"],
+  ["a police officer","👮 警察官"],["a baker","🥐 パン屋さん"],["a YouTuber","📹 ユーチューバー"]
+];
+const DREAM_REASON_CHOICES = [
+  ["I love animals","動物が大好きだから"],["I like helping people","人を助けるのが好きだから"],
+  ["I like making things","ものを作るのが好きだから"],["I like teaching others","教えるのが好きだから"],
+  ["it looks really fun","とても楽しそうだから"],["I want to make people happy","人を幸せにしたいから"]
+];
+const NUM_EN = ["zero","one","two","three","four","five","six","seven","eight","nine","ten"];
 
 /* ================= 音声（TTS） ================= */
 let enVoice = null;
@@ -1430,57 +1493,56 @@ function buildPhraseRow(p, headEl, cat) {
   return row;
 }
 
-/* ================= じこしょうかい ================= */
-let profile = lsGet(KEY_PROFILE, { name: "", age: 8, from: "", like: "", food: "" });
+/* ================= じこしょうかい（英検3級レベル） ================= */
+let profile = lsGet(KEY_PROFILE, {});
+if (!profile || typeof profile !== "object") profile = {};
+if (!profile.age) profile.age = 12;
+
+/* 選択チップの共通描画。optional=true ならもう一度タップで取り消せる */
+function renderChipRow(rowId, choices, field, optional, onPick) {
+  const row = document.getElementById(rowId);
+  row.innerHTML = "";
+  choices.forEach(([val, label]) => {
+    const c = document.createElement("button");
+    c.className = "chip" + (profile[field] === val ? " sel" : "");
+    c.textContent = label;
+    c.addEventListener("click", () => {
+      if (optional && profile[field] === val) profile[field] = "";
+      else profile[field] = val;
+      row.querySelectorAll(".chip").forEach(x => x.classList.remove("sel"));
+      if (profile[field] === val) c.classList.add("sel");
+      if (onPick) onPick();
+    });
+    row.appendChild(c);
+  });
+}
 function renderIntroForm() {
   document.getElementById("inName").value = profile.name || "";
+  document.getElementById("inNick").value = profile.nick || "";
   document.getElementById("inFrom").value = profile.from || "";
-  const ageRow = document.getElementById("ageChips");
-  ageRow.innerHTML = "";
-  for (let a = 5; a <= 15; a++) {
-    const c = document.createElement("button");
-    c.className = "chip" + (profile.age === a ? " sel" : "");
-    c.textContent = a;
-    c.addEventListener("click", () => {
-      profile.age = a;
-      ageRow.querySelectorAll(".chip").forEach(x => x.classList.remove("sel"));
-      c.classList.add("sel");
-    });
-    ageRow.appendChild(c);
-  }
-  const likeRow = document.getElementById("likeChips");
-  likeRow.innerHTML = "";
-  LIKE_CHOICES.forEach(([en, label]) => {
-    const c = document.createElement("button");
-    c.className = "chip" + (profile.like === en ? " sel" : "");
-    c.textContent = label;
-    c.addEventListener("click", () => {
-      profile.like = en;
-      document.getElementById("inLikeFree").value = "";
-      likeRow.querySelectorAll(".chip").forEach(x => x.classList.remove("sel"));
-      c.classList.add("sel");
-    });
-    likeRow.appendChild(c);
-  });
-  const foodRow = document.getElementById("foodChips");
-  foodRow.innerHTML = "";
-  FOOD_CHOICES.forEach(([en, label]) => {
-    const c = document.createElement("button");
-    c.className = "chip" + (profile.food === en ? " sel" : "");
-    c.textContent = label;
-    c.addEventListener("click", () => {
-      profile.food = en;
-      foodRow.querySelectorAll(".chip").forEach(x => x.classList.remove("sel"));
-      c.classList.add("sel");
-    });
-    foodRow.appendChild(c);
-  });
+  document.getElementById("inDreamFree").value = "";
+  renderChipRow("ageChips", Array.from({ length: 11 }, (_, i) => [i + 5, String(i + 5)]), "age", false);
+  renderChipRow("gradeChips", GRADE_CHOICES, "grade", true);
+  renderChipRow("famousChips", FAMOUS_CHOICES, "famous", true);
+  renderChipRow("familyChips", [2,3,4,5,6,7].map(n => [n, n + "人"]), "family", true);
+  renderChipRow("petChips", PET_CHOICES, "pet", true);
+  renderChipRow("likeChips", LIKE_CHOICES, "like", false, () => { document.getElementById("inLikeFree").value = ""; });
+  renderChipRow("yearsChips", [1,2,3,4,5,6,7,8].map(n => [n, n + "年"]), "years", true);
+  renderChipRow("goodatChips", GOODAT_CHOICES, "goodat", true);
+  renderChipRow("subjectChips", SUBJECT_CHOICES, "subject", true);
+  renderChipRow("subjReasonChips", SUBJ_REASON_CHOICES, "subjReason", true);
+  renderChipRow("foodChips", FOOD_CHOICES, "food", false);
+  renderChipRow("dreamChips", DREAM_CHOICES, "dream", true, () => { document.getElementById("inDreamFree").value = ""; });
+  renderChipRow("dreamReasonChips", DREAM_REASON_CHOICES, "dreamReason", true);
 }
 document.getElementById("buildIntro").addEventListener("click", () => {
   profile.name = document.getElementById("inName").value.trim();
+  profile.nick = document.getElementById("inNick").value.trim();
   profile.from = document.getElementById("inFrom").value.trim();
   const free = document.getElementById("inLikeFree").value.trim();
   if (free) profile.like = free;
+  const dreamFree = document.getElementById("inDreamFree").value.trim();
+  if (dreamFree) profile.dream = dreamFree;
   if (!profile.name) { alert("なまえをローマ字で入れてね！ れい: Haruto"); return; }
   if (!profile.like) { alert("好きなことを1つえらんでね！"); return; }
   if (!profile.food) { alert("好きな食べものをえらんでね！"); return; }
@@ -1490,13 +1552,66 @@ document.getElementById("buildIntro").addEventListener("click", () => {
 function introLines() {
   const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
   const lines = [
-    ["Hello! My name is " + cap(profile.name) + ".", "こんにちは！私の名前は" + cap(profile.name) + "です。"],
-    ["I'm " + profile.age + " years old.", profile.age + "歳です。"]
+    ["Hello, everyone! My name is " + cap(profile.name) + ".", "みなさん、こんにちは！私の名前は" + cap(profile.name) + "です。"]
   ];
-  if (profile.from) lines.push(["I live in " + cap(profile.from) + ".", cap(profile.from) + "に住んでいます。"]);
-  lines.push(["I like " + profile.like + ".", profile.like + "が好きです。"]);
-  lines.push(["My favorite food is " + profile.food + ".", "好きな食べものは" + profile.food + "です。"]);
-  lines.push(["Nice to meet you!", "よろしくおねがいします！"]);
+  if (profile.nick) lines.push(["Please call me " + cap(profile.nick) + ".", cap(profile.nick) + "と呼んでください。"]);
+  if (profile.grade) {
+    const gLabel = (GRADE_CHOICES.find(g => g[0] === profile.grade) || [])[1] || "";
+    const gJa = gLabel === "小5" ? "小学5年生" : gLabel === "小6" ? "小学6年生" : gLabel === "中1" ? "中学1年生" : gLabel === "中2" ? "中学2年生" : "中学3年生";
+    lines.push(["I'm " + profile.age + " years old, and I'm in " + profile.grade + ".", profile.age + "歳で、" + gJa + "です。"]);
+  } else {
+    lines.push(["I'm " + profile.age + " years old.", profile.age + "歳です。"]);
+  }
+  if (profile.from) {
+    if (profile.famous) {
+      const fJa = (FAMOUS_CHOICES.find(f => f[0] === profile.famous) || ["",""])[1].replace(/^\S+\s/, "");
+      lines.push(["I live in " + cap(profile.from) + ". It's famous for " + profile.famous + ".",
+        cap(profile.from) + "に住んでいます。「" + fJa + "」で有名なところです。"]);
+    } else {
+      lines.push(["I live in " + cap(profile.from) + ".", cap(profile.from) + "に住んでいます。"]);
+    }
+  }
+  if (profile.family) lines.push(["There are " + NUM_EN[profile.family] + " people in my family.", "私は" + profile.family + "人家族です。"]);
+  if (profile.pet) {
+    const pJa = (PET_CHOICES.find(p => p[0] === profile.pet) || ["",""])[1].replace(/^\S+\s/, "");
+    lines.push(["I have " + profile.pet + " at home.", "家で" + pJa + "を飼っています。"]);
+  }
+  const likeJa = ((LIKE_CHOICES.find(l => l[0] === profile.like) || ["",""])[1] || "").replace(/^\S+\s/, "") || profile.like;
+  if (profile.years) {
+    lines.push(["I like " + profile.like + " very much. I have enjoyed it for " + NUM_EN[profile.years] + (profile.years === 1 ? " year." : " years."),
+      likeJa + "が大好きで、もう" + profile.years + "年間楽しんでいます。"]);
+  } else {
+    lines.push(["I like " + profile.like + " very much.", likeJa + "が大好きです。"]);
+  }
+  if (profile.goodat) {
+    const gJa = (GOODAT_CHOICES.find(g => g[0] === profile.goodat) || ["",""])[1].replace(/^\S+\s/, "");
+    lines.push(["I'm good at " + profile.goodat + ".", gJa + "が得意です。"]);
+  }
+  if (profile.subject) {
+    const sJa = (SUBJECT_CHOICES.find(s => s[0] === profile.subject) || ["",""])[1].replace(/^\S+\s/, "");
+    if (profile.subjReason) {
+      const rJa = (SUBJ_REASON_CHOICES.find(r => r[0] === profile.subjReason) || ["",""])[1];
+      lines.push(["My favorite subject is " + profile.subject + " because " + profile.subjReason + ".",
+        "いちばん好きな教科は" + sJa + "です。" + rJa + "です。"]);
+    } else {
+      lines.push(["My favorite subject is " + profile.subject + ".", "いちばん好きな教科は" + sJa + "です。"]);
+    }
+  }
+  const foodJa = ((FOOD_CHOICES.find(f => f[0] === profile.food) || ["",""])[1] || "").replace(/^\S+\s/, "") || profile.food;
+  lines.push(["My favorite food is " + profile.food + ". It always makes me happy.",
+    "好きな食べものは" + foodJa + "です。食べるといつも幸せな気持ちになります。"]);
+  if (profile.dream) {
+    const dreamJa = ((DREAM_CHOICES.find(d => d[0] === profile.dream) || ["",""])[1] || "").replace(/^\S+\s/, "") || profile.dream;
+    if (profile.dreamReason) {
+      const rJa = (DREAM_REASON_CHOICES.find(r => r[0] === profile.dreamReason) || ["",""])[1];
+      lines.push(["In the future, I want to be " + profile.dream + " because " + profile.dreamReason + ".",
+        "将来は" + dreamJa + "になりたいです。" + rJa + "です。"]);
+    } else {
+      lines.push(["In the future, I want to be " + profile.dream + ".", "将来は" + dreamJa + "になりたいです。"]);
+    }
+  }
+  lines.push(["Thank you for listening. I'm looking forward to talking with you!",
+    "聞いてくれてありがとう。みなさんとお話しできるのを楽しみにしています！"]);
   return lines;
 }
 function renderIntroResult() {
